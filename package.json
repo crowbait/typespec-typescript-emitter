@@ -1,0 +1,47 @@
+{
+  "name": "typespec-typescript-routes",
+  "version": "1.0.0",
+  "description": "A TypeSpec library providing an emitter that generates an importable TypeScript object containing all routes for robust importing",
+  "homepage": "https://github.com/crowbait/typespec-typescript-routes#readme",
+  "bugs": "https://github.com/crowbait/typespec-typescript-routes/issues",
+  "license": "MIT",
+  "author": {
+    "name": "Crowbait",
+    "url": "https://github.com/crowbait"
+  },
+  "type": "module",
+  "main": "dist/src/index.js",
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "default": "./dist/src/index.js"
+    },
+    "./testing": {
+      "types": "./dist/src/testing/index.d.ts",
+      "default": "./dist/src/testing/index.js"
+    }
+  },
+  "devDependencies": {
+    "@types/node": "latest",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.45.0",
+    "prettier": "^3.0.3",
+    "rimraf": "^6.0.1",
+    "typescript": "^5.3.3"
+  },
+  "peerDependencies": {
+    "@typespec/compiler": "^0.62.0"
+  },
+  "scripts": {
+    "build": "npm run format && rimraf dist && tsc",
+    "watch": "tsc --watch",
+    "test": "npm run build && node --test",
+    "lint": "eslint src/ test/ --report-unused-disable-directives --max-warnings=0",
+    "lint:fix": "eslint . --report-unused-disable-directives --fix",
+    "format": "prettier .  --write",
+    "format:check": "prettier --check .",
+    "prepare": "npm run build",
+    "prepublishOnly": "npm run test && npm version patch && npm run build"
+  }
+}
