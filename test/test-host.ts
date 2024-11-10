@@ -4,11 +4,11 @@ import {
   createTestWrapper,
   expectDiagnosticEmpty,
 } from "@typespec/compiler/testing";
-import { TypespecTypescriptRoutesTestLibrary } from "../src/testing/index.js";
+import { TypespecTypescriptRoutesEmitterTestLibrary } from "../src/testing/index.js";
 
 export async function createTypespecTypescriptRoutesTestHost() {
   return createTestHost({
-    libraries: [TypespecTypescriptRoutesTestLibrary],
+    libraries: [TypespecTypescriptRoutesEmitterTestLibrary],
   });
 }
 
@@ -18,24 +18,26 @@ export async function createTypespecTypescriptRoutesTestRunner() {
   return createTestWrapper(host, {
     compilerOptions: {
       noEmit: false,
-      emit: ["typespec-typescript-routes"],
+      emit: ["typespec-typescript-routes-emitter"],
     },
   });
 }
 
 export async function emitWithDiagnostics(
-  code: string
+  code: string,
 ): Promise<[Record<string, string>, readonly Diagnostic[]]> {
   const runner = await createTypespecTypescriptRoutesTestRunner();
   await runner.compileAndDiagnose(code, {
     outputDir: "tsp-output",
   });
-  const emitterOutputDir = "./tsp-output/typespec-typescript-routes";
+  const emitterOutputDir = "./tsp-output/typespec-typescript-routes-emitter";
   const files = await runner.program.host.readDir(emitterOutputDir);
 
   const result: Record<string, string> = {};
   for (const file of files) {
-    result[file] = (await runner.program.host.readFile(resolvePath(emitterOutputDir, file))).text;
+    result[file] = (
+      await runner.program.host.readFile(resolvePath(emitterOutputDir, file))
+    ).text;
   }
   return [result, runner.program.diagnostics];
 }

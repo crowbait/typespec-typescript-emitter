@@ -1,9 +1,9 @@
 {
-  "name": "typespec-typescript-routes",
+  "name": "typespec-typescript-routes-emitter",
   "version": "1.0.0",
   "description": "A TypeSpec library providing an emitter that generates an importable TypeScript object containing all routes for robust importing",
-  "homepage": "https://github.com/crowbait/typespec-typescript-routes#readme",
-  "bugs": "https://github.com/crowbait/typespec-typescript-routes/issues",
+  "homepage": "https://github.com/crowbait/typespec-typescript-routes-emitter#readme",
+  "bugs": "https://github.com/crowbait/typespec-typescript-routes-emitter/issues",
   "license": "MIT",
   "author": {
     "name": "Crowbait",
