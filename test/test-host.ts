@@ -4,11 +4,11 @@ import {
   createTestWrapper,
   expectDiagnosticEmpty,
 } from "@typespec/compiler/testing";
-import { TypespecTypescriptRoutesEmitterTestLibrary } from "../src/testing/index.js";
+import { TypespecTypescriptEmitterTestLibrary } from "../src/testing/index.js";
 
 export async function createTypespecTypescriptRoutesTestHost() {
   return createTestHost({
-    libraries: [TypespecTypescriptRoutesEmitterTestLibrary],
+    libraries: [TypespecTypescriptEmitterTestLibrary],
   });
 }
 
@@ -18,7 +18,7 @@ export async function createTypespecTypescriptRoutesTestRunner() {
   return createTestWrapper(host, {
     compilerOptions: {
       noEmit: false,
-      emit: ["typespec-typescript-routes-emitter"],
+      emit: ["typespec-typescript-emitter"],
     },
   });
 }
@@ -30,7 +30,7 @@ export async function emitWithDiagnostics(
   await runner.compileAndDiagnose(code, {
     outputDir: "tsp-output",
   });
-  const emitterOutputDir = "./tsp-output/typespec-typescript-routes-emitter";
+  const emitterOutputDir = "./tsp-output/typespec-typescript-emitter";
   const files = await runner.program.host.readDir(emitterOutputDir);
 
   const result: Record<string, string> = {};

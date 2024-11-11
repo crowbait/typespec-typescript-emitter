@@ -5,8 +5,8 @@ import {
 } from "@typespec/compiler/testing";
 import { fileURLToPath } from "url";
 
-export const TypespecTypescriptRoutesEmitterTestLibrary: TypeSpecTestLibrary =
+export const TypespecTypescriptEmitterTestLibrary: TypeSpecTestLibrary =
   createTestLibrary({
-    name: "typespec-typescript-routes-emitter",
+    name: "typespec-typescript-emitter",
     packageRoot: resolvePath(fileURLToPath(import.meta.url), "../../../../"),
   });
