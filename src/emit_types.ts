@@ -79,7 +79,7 @@ const emitTypes = (
           typeStr = resolveUnion(t, nestlevel);
           break;
         default:
-          console.log("Could not resolve type:", t.kind);
+          console.warn("Could not resolve type:", t.kind);
       }
       return typeStr;
     };
@@ -151,7 +151,7 @@ const emitTypes = (
             ret = "Date";
             break;
           default:
-            console.log("Could not resolve scalar:", s.name);
+            console.warn("Could not resolve scalar:", s.name);
         }
       }
       return s.baseScalar ? resolveScalar(s.baseScalar) : ret;
@@ -166,7 +166,7 @@ const emitTypes = (
         if (doc) ret = ret.addLine(`/** ${doc} */`, nestlevel + 1);
         const typeStr = resolveType(p.type, nestlevel);
         if (typeStr.includes("unknown"))
-          console.log(`Could not resolve property ${p.name} on ${m.name}`);
+          console.warn(`Could not resolve property ${p.name} on ${m.name}`);
         ret = ret.addLine(
           `${p.name}: ${typeStr}${i < m.properties.size ? "," : ""}`,
           nestlevel + 1,

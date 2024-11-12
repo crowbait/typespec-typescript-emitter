@@ -12,7 +12,7 @@ It can export two things:
   - 1 file for each (nested) namespace
   - exports models, enums and unions
   - does NOT export aliases (see below)
-- for TypeSpec.Http: ts file containing a nested object containing information about every route
+- for `TypeSpec.Http`: ts file containing a nested object containing information about every route
   - this can be imported at runtime to provide a robust way of eg. accessing URLs
 
 ## Content
