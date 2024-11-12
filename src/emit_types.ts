@@ -168,7 +168,7 @@ const emitTypes = (
         if (typeStr.includes("unknown"))
           console.warn(`Could not resolve property ${p.name} on ${m.name}`);
         ret = ret.addLine(
-          `${p.name}: ${typeStr}${i < m.properties.size ? "," : ""}`,
+          `${p.name}${p.optional ? "?" : ""}: ${typeStr}${i < m.properties.size ? "," : ""}`,
           nestlevel + 1,
         );
         i++;

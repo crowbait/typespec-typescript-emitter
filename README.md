@@ -74,7 +74,7 @@ namespace myProject { // remember to set in config!
     title: string,
     subtitle: null | string,
     read: ReadStatus,
-    chapterTitles: string[]
+    chapterTitles?: string[]
   }
 
   // you can either nest namespaces like this:
@@ -102,7 +102,7 @@ export interface Book {
   title: string;
   subtitile: null | string;
   read: ReadStatus;
-  chapterTitles: string[];
+  chapterTitles?: string[];
 }
 
 // the other namespace will be emitted to `/path/to/outdir/SubNameSpace.ts`
