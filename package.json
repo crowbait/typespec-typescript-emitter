@@ -1,6 +1,6 @@
 {
   "name": "typespec-typescript-emitter",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A TypeSpec library providing an emitter that generates TypeScript types and a structured routes object for robust importing",
   "homepage": "https://github.com/crowbait/typespec-typescript-emitter#readme",
   "bugs": "https://github.com/crowbait/typespec-typescript-emitter/issues",
