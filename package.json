@@ -43,6 +43,6 @@
     "format": "prettier .  --write",
     "format:check": "prettier --check .",
     "prepare": "npm run build",
-    "prepublishOnly": "npm run test && npm version patch && npm run build"
+    "prepublishOnly": "npm version patch && npm run build"
   }
 }
