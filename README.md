@@ -41,7 +41,7 @@ options:
     root-namespace: "string"
     out-dir: "{cwd}/path"
     enable-types: true
-    enable-routes: true
+    enable-routes: false
 ```
 
 The following options are available:
@@ -94,15 +94,15 @@ namespace myProject { // remember to set in config!
 export enum ReadStatus {
   Never,
   Once,
-  Often,
+  Often
 }
 export type Author = "unknown" | string;
 export interface Book {
-  author: Author;
-  title: string;
-  subtitile: null | string;
-  read: ReadStatus;
-  chapterTitles?: string[];
+  author: Author,
+  title: string,
+  subtitile: null | string,
+  read: ReadStatus,
+  chapterTitles?: string[]
 }
 
 // the other namespace will be emitted to `/path/to/outdir/SubNameSpace.ts`
@@ -168,8 +168,8 @@ namespace myProject { // remember to set in config!
 ```ts
 /* /path/to/outdir/routes_{root-namespace}.ts */
 export interface IRoute {
-  method: string
-  getUrl: (p: any) => string
+  method: string,
+  getUrl: (p: any) => string,
   auth: boolean | 'varies'
 };
 
@@ -182,7 +182,7 @@ export const routes_myProject = {
   getSmthElse: {
     method: 'get',
     getUrl: (p: {param: string}) => `https://api.example.com/${p.param}`,
-    auth: 'varies
+    auth: 'varies'
   },
   sub: {
     postSomething: {
@@ -194,7 +194,7 @@ export const routes_myProject = {
 } as const;
 ```
 
-The `IRoute` interface should be used sparsely. Consider the following:
+The `IRoute` interface should be used with caution. Consider the following:
 
 ```ts
 const foo: IRoute = routes_myProject.some.route;

@@ -4,7 +4,7 @@ import tsEslint from "typescript-eslint";
 
 export default tsEslint.config(
   {
-    ignores: ["**/dist/**/*", "**/.temp/**/*"],
+    ignores: ["**/dist/**/*", "**/.temp/**/*", "**/*.md"],
   },
   eslint.configs.recommended,
   ...tsEslint.configs.recommended,
