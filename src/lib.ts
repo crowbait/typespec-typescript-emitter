@@ -3,6 +3,8 @@ import { createTypeSpecLibrary, JSONSchemaType } from "@typespec/compiler";
 export interface EmitterOptions {
   "root-namespace": string;
   "out-dir": string;
+  "enable-types": boolean;
+  "enable-routes": boolean;
 }
 
 const EmitterOptionsSchema: JSONSchemaType<EmitterOptions> = {
@@ -11,6 +13,8 @@ const EmitterOptionsSchema: JSONSchemaType<EmitterOptions> = {
   properties: {
     "root-namespace": { type: "string" },
     "out-dir": { type: "string", format: "absolute-path" },
+    "enable-types": { type: "boolean" },
+    "enable-routes": { type: "boolean" },
   },
   required: ["root-namespace"],
 };

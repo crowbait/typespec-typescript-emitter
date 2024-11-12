@@ -7,16 +7,18 @@ import {
 import { getServers } from "@typespec/http";
 import emitRoutes from "./emit_routes.js";
 import emitTypes from "./emit_types.js";
+import { EmitterOptions } from "./lib.js";
 
 export async function $onEmit(context: EmitContext) {
   if (!context.program.compilerOptions.noEmit) {
-    const outDir = context.options["out-dir"]
-      ? resolvePath(context.options["out-dir"])
-      : resolvePath(context.emitterOutputDir);
-    console.log(`Writing routes to ${outDir}`);
+    const options: EmitterOptions = {
+      "root-namespace": context.options["root-namespace"],
+      "out-dir": context.options["out-dir"] ?? context.emitterOutputDir,
+      "enable-types": context.options["enable-types"] ?? true,
+      "enable-routes": context.options["enable-routes"] ?? false,
+    };
 
-    const rootNode = `routes_${context.options["root-namespace"]}`;
-    let rootServer = "";
+    console.log(`Writing routes to ${options["out-dir"]}`);
 
     let targetNamespaceFound = false;
     let routesObject = "";
@@ -28,33 +30,43 @@ export async function $onEmit(context: EmitContext) {
           n.name === context.options["root-namespace"]
         ) {
           targetNamespaceFound = true;
-          rootServer = getServers(context.program, n)![0].url;
-          routesObject = emitRoutes(context, n, rootServer);
-          typeFiles = emitTypes(context, n);
+          if (options["enable-routes"]) {
+            const servers = getServers(context.program, n);
+            routesObject = emitRoutes(
+              context,
+              n,
+              servers && servers[0] ? servers[0].url : "",
+            );
+          }
+          if (options["enable-types"]) typeFiles = emitTypes(context, n);
         }
       },
     });
 
     if (!targetNamespaceFound)
       throw new Error("Targeted root namespace not found.");
-    if (!routesObject) throw new Error("Routes object empty.");
 
     // routes object
-    await emitFile(context.program, {
-      path: resolvePath(
-        outDir,
-        `routes_${context.options["root-namespace"]}.ts`,
-      ),
-      content: routesObject,
-    });
+    if (options["enable-routes"]) {
+      if (!routesObject) throw new Error("Routes object empty.");
+      await emitFile(context.program, {
+        path: resolvePath(
+          options["out-dir"],
+          `routes_${options["root-namespace"]}.ts`,
+        ),
+        content: routesObject,
+      });
+    }
 
     // type files
-    const typeFileArr = Object.entries(typeFiles);
-    for (let i = 0; i < typeFileArr.length; i++) {
-      await emitFile(context.program, {
-        path: resolvePath(outDir, `${typeFileArr[i][0]}.ts`),
-        content: typeFileArr[i][1],
-      });
+    if (options["enable-types"]) {
+      const typeFileArr = Object.entries(typeFiles);
+      for (let i = 0; i < typeFileArr.length; i++) {
+        await emitFile(context.program, {
+          path: resolvePath(options["out-dir"], `${typeFileArr[i][0]}.ts`),
+          content: typeFileArr[i][1],
+        });
+      }
     }
   }
 }
