@@ -6,6 +6,7 @@ import {
 } from "@typespec/compiler";
 import { getServers } from "@typespec/http";
 import emitRoutes from "./emit_routes.js";
+import emitTypes from "./emit_types.js";
 
 export async function $onEmit(context: EmitContext) {
   if (!context.program.compilerOptions.noEmit) {
@@ -19,6 +20,7 @@ export async function $onEmit(context: EmitContext) {
 
     let targetNamespaceFound = false;
     let routesObject = "";
+    let typeFiles: ReturnType<typeof emitTypes> = {};
     navigateProgram(context.program, {
       namespace(n) {
         if (
@@ -28,6 +30,7 @@ export async function $onEmit(context: EmitContext) {
           targetNamespaceFound = true;
           rootServer = getServers(context.program, n)![0].url;
           routesObject = emitRoutes(context, n, rootServer);
+          typeFiles = emitTypes(context, n);
         }
       },
     });
@@ -36,12 +39,22 @@ export async function $onEmit(context: EmitContext) {
       throw new Error("Targeted root namespace not found.");
     if (!routesObject) throw new Error("Routes object empty.");
 
+    // routes object
     await emitFile(context.program, {
       path: resolvePath(
         outDir,
-        `${context.options["root-namespace"]}_routes.ts`,
+        `routes_${context.options["root-namespace"]}.ts`,
       ),
       content: routesObject,
     });
+
+    // type files
+    const typeFileArr = Object.entries(typeFiles);
+    for (let i = 0; i < typeFileArr.length; i++) {
+      await emitFile(context.program, {
+        path: resolvePath(outDir, `${typeFileArr[i][0]}.ts`),
+        content: typeFileArr[i][1],
+      });
+    }
   }
 }
