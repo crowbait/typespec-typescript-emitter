@@ -23,13 +23,12 @@
   },
   "devDependencies": {
     "@types/node": "latest",
-    "@typescript-eslint/eslint-plugin": "^6.0.0",
-    "@typescript-eslint/parser": "^6.0.0",
-    "eslint": "^8.45.0",
+    "eslint": "^9.15.0",
     "husky": "^9.1.6",
     "prettier": "^3.0.3",
     "rimraf": "^6.0.1",
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "typescript-eslint": "^8.15.0"
   },
   "peerDependencies": {
     "@typespec/compiler": "^0.62.0",
@@ -41,7 +40,7 @@
     "test": "npm run build && node --test",
     "lint": "eslint src/ test/ --report-unused-disable-directives --max-warnings=0",
     "lint:fix": "eslint . --report-unused-disable-directives --fix",
-    "format": "prettier .  --write",
+    "format": "prettier . --write",
     "format:check": "prettier --check .",
     "prepare": "husky",
     "prepublishOnly": "npm run build"

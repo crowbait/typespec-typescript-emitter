@@ -4,6 +4,7 @@ export interface EmitterOptions {
   "root-namespace": string;
   "out-dir": string;
   "enable-types": boolean;
+  "enable-typeguards": boolean;
   "enable-routes": boolean;
 }
 
@@ -14,6 +15,7 @@ const EmitterOptionsSchema: JSONSchemaType<EmitterOptions> = {
     "root-namespace": { type: "string" },
     "out-dir": { type: "string", format: "absolute-path" },
     "enable-types": { type: "boolean" },
+    "enable-typeguards": { type: "boolean" },
     "enable-routes": { type: "boolean" },
   },
   required: ["root-namespace"],

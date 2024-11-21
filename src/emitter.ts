@@ -15,6 +15,9 @@ export async function $onEmit(context: EmitContext) {
       "root-namespace": context.options["root-namespace"],
       "out-dir": context.options["out-dir"] ?? context.emitterOutputDir,
       "enable-types": context.options["enable-types"] ?? true,
+      "enable-typeguards":
+        (context.options["enable-types"] ?? true) &&
+        (context.options["enable-typeguards"] ?? false),
       "enable-routes": context.options["enable-routes"] ?? false,
     };
 
@@ -38,7 +41,11 @@ export async function $onEmit(context: EmitContext) {
               servers && servers[0] ? servers[0].url : "",
             );
           }
-          if (options["enable-types"]) typeFiles = emitTypes(context, n);
+          if (options["enable-types"] || options["enable-typeguards"])
+            typeFiles = emitTypes(context, n, {
+              types: options["enable-types"],
+              typeguards: options["enable-typeguards"],
+            });
         }
       },
     });
@@ -59,7 +66,7 @@ export async function $onEmit(context: EmitContext) {
     }
 
     // type files
-    if (options["enable-types"]) {
+    if (options["enable-types"] || options["enable-typeguards"]) {
       const typeFileArr = Object.entries(typeFiles);
       for (let i = 0; i < typeFileArr.length; i++) {
         await emitFile(context.program, {

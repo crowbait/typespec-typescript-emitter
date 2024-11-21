@@ -6,22 +6,23 @@ TypeScript output to a TypeSpec project.
 Currently, this library is tailored to my specific use case, which is defining
 an HTTP API. The 'routes'-emitter will only work on HTTP operations. **However**, exporting all models as types is independent of HTTP, and so may also benefit projects with a different usage scenario.
 
-It can export two things:
+It can the following things:
 
 - ts files exporting every model present in the spec
   - 1 file for each (nested) namespace
   - exports models, enums and unions
   - does NOT export aliases (see below)
+- optional typeguards, *if* type export is enabled
 - for `TypeSpec.Http`: ts file containing a nested object containing information about every route
   - this can be imported at runtime to provide a robust way of eg. accessing URLs
 
-## Content
+## Content <!-- omit from toc -->
 
 - [Installation](#installation)
 - [Configuration](#configuration)
-- [Types Emitter](#types-emitter)
+- [Types emitter](#types-emitter)
   - [Alias's](#aliass)
-- [Routes Emitter](#routes-emitter)
+- [Routes emitter](#routes-emitter)
 
 ## Installation
 
@@ -41,6 +42,7 @@ options:
     root-namespace: "string"
     out-dir: "{cwd}/path"
     enable-types: true
+    enable-typeguards: false
     enable-routes: false
 ```
 
@@ -49,6 +51,7 @@ The following options are available:
 - `root-namespace` **(required)**: name of the most outer namespace. As the TypeSpec docs recommend, your project is expected to consist of one or more nested namespaces. Here, you need to specify the most outer / general namespace you want emitted.
 - `out-dir`: output directory. Must be an absolute path; replacers like `{cwd}` are permitted.
 - `enable-types` (default: true): enables output of TypeScript types.
+- `enable-typeguards` (default: false): enables output of typeguards, *IF* type-output is enabled.
 - `enable-routes` (default: false): enables output of the HTTP-routes object.
 
 ## Types emitter
@@ -104,6 +107,17 @@ export interface Book {
   read: ReadStatus,
   chapterTitles?: string[]
 }
+
+// if `enable-typeguards` is set to true
+export function isBook(arg: any): arg is Book {
+  return (
+    (arg['author'] !== undefined) &&
+    (arg['title'] !== undefined && typeof arg['title'] === 'string') &&
+    (arg['subtitle'] !== undefined) &&
+    (arg['read'] !== undefined) &&
+    (arg['chapterTitles'] === undefined ||  Array.isArray(arg['chapterTitles']))
+  );
+};
 
 // the other namespace will be emitted to `/path/to/outdir/SubNameSpace.ts`
 ```

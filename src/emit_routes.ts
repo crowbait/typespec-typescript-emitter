@@ -54,9 +54,7 @@ const emitRoutes = (
       );
       if (pathParams.length > 0) {
         line("getUrl: (p: {", 1);
-        pathParams
-          .map((p) => `${p.name}: string`)
-          .forEach((p, i) => line(p, 2));
+        pathParams.map((p) => `${p.name}: string`).forEach((p) => line(p, 2));
         let fn = "}) => ";
         fn += pathParams.reduce(
           (sum, cur) =>
