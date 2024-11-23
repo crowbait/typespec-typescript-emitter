@@ -6,6 +6,7 @@ export interface EmitterOptions {
   "enable-types": boolean;
   "enable-typeguards": boolean;
   "enable-routes": boolean;
+  "typeguards-in-routes": boolean;
 }
 
 const EmitterOptionsSchema: JSONSchemaType<EmitterOptions> = {
@@ -17,6 +18,7 @@ const EmitterOptionsSchema: JSONSchemaType<EmitterOptions> = {
     "enable-types": { type: "boolean" },
     "enable-typeguards": { type: "boolean" },
     "enable-routes": { type: "boolean" },
+    "typeguards-in-routes": { type: "boolean" },
   },
   required: ["root-namespace"],
 };

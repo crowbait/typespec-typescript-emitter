@@ -6,37 +6,20 @@ import {
 } from "./emit_types_resolve.js";
 import { createModelGuard } from "./emit_types_typeguards.js";
 import autogenerateWarning from "./helper_autogenerateWarning.js";
-
-declare global {
-  interface String {
-    addLine(str: string, tabs?: number, continued?: boolean): string;
-  }
-}
-
-String.prototype.addLine = function (
-  this: string,
-  str: string,
-  tabs?: number,
-  continued?: boolean,
-): string {
-  return `${this}${"  ".repeat(tabs ?? 0)}${str}${continued ? "" : "\n"}`;
-};
+import { EmitterOptions } from "./lib.js";
 
 const emitTypes = (
   context: EmitContext,
   namespace: Namespace,
-  emit: {
-    types?: boolean;
-    typeguards?: boolean;
-  },
-): Record<string, string> => {
-  const out: ReturnType<typeof emitTypes> = {};
+  options: EmitterOptions,
+): { files: Record<string, string>; typeguardedNames: string[] } => {
+  const out: ReturnType<typeof emitTypes> = { files: {}, typeguardedNames: [] };
 
   const traverseNamespace = (n: Namespace): void => {
     let file = autogenerateWarning;
 
     n.enums.forEach((e) => {
-      if (emit.types) {
+      if (options["enable-types"]) {
         const resolved = resolveEnum(e, 0);
         if (resolved) {
           const doc = getDoc(context.program, e);
@@ -46,7 +29,7 @@ const emitTypes = (
       }
     });
     n.unions.forEach((u) => {
-      if (emit.types) {
+      if (options["enable-types"]) {
         const resolved = resolveUnion(context, u, 0);
         if (resolved) {
           const doc = getDoc(context.program, u);
@@ -56,7 +39,7 @@ const emitTypes = (
       }
     });
     n.models.forEach((m) => {
-      if (emit.types) {
+      if (options["enable-types"]) {
         const resolved = resolveModel(context, m);
         if (resolved) {
           const doc = getDoc(context.program, m);
@@ -64,7 +47,7 @@ const emitTypes = (
           file = file.addLine(`export interface ${m.name} ${resolved};`);
         }
       }
-      if (emit.typeguards) {
+      if (options["enable-typeguards"]) {
         const guard = createModelGuard(context, m);
         if (guard) {
           file = file.addLine(
@@ -74,13 +57,14 @@ const emitTypes = (
           file = file.addLine(guard, 2);
           file = file.addLine(");", 1);
           file = file.addLine("};");
+          out.typeguardedNames.push(m.name);
         }
       }
       file += "\n";
     });
 
     // set output for this namespace
-    out[n.name.charAt(0).toUpperCase() + n.name.slice(1)] = file;
+    out.files[n.name.charAt(0).toUpperCase() + n.name.slice(1)] = file;
     // recursively iterate child namespaces
     n.namespaces.forEach((ns) => traverseNamespace(ns));
   };

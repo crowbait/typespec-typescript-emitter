@@ -9,6 +9,21 @@ import emitRoutes from "./emit_routes.js";
 import emitTypes from "./emit_types.js";
 import { EmitterOptions } from "./lib.js";
 
+declare global {
+  interface String {
+    addLine(str: string, tabs?: number, continued?: boolean): string;
+  }
+}
+
+String.prototype.addLine = function (
+  this: string,
+  str: string,
+  tabs?: number,
+  continued?: boolean,
+): string {
+  return `${this}${"  ".repeat(tabs ?? 0)}${str}${continued ? "" : "\n"}`;
+};
+
 export async function $onEmit(context: EmitContext) {
   if (!context.program.compilerOptions.noEmit) {
     const options: EmitterOptions = {
@@ -19,13 +34,21 @@ export async function $onEmit(context: EmitContext) {
         (context.options["enable-types"] ?? true) &&
         (context.options["enable-typeguards"] ?? false),
       "enable-routes": context.options["enable-routes"] ?? false,
+      "typeguards-in-routes":
+        (context.options["enable-types"] ?? true) &&
+        (context.options["enable-typeguards"] ?? false) &&
+        (context.options["enable-routes"] ?? false) &&
+        (context.options["typeguards-in-routes"] ?? false),
     };
 
     console.log(`Writing routes to ${options["out-dir"]}`);
 
     let targetNamespaceFound = false;
     let routesObject = "";
-    let typeFiles: ReturnType<typeof emitTypes> = {};
+    let typeFiles: ReturnType<typeof emitTypes> = {
+      files: {},
+      typeguardedNames: [],
+    };
     navigateProgram(context.program, {
       namespace(n) {
         if (
@@ -33,19 +56,18 @@ export async function $onEmit(context: EmitContext) {
           n.name === context.options["root-namespace"]
         ) {
           targetNamespaceFound = true;
+          if (options["enable-types"] || options["enable-typeguards"])
+            typeFiles = emitTypes(context, n, options);
           if (options["enable-routes"]) {
             const servers = getServers(context.program, n);
             routesObject = emitRoutes(
               context,
               n,
               servers && servers[0] ? servers[0].url : "",
+              options,
+              typeFiles.typeguardedNames,
             );
           }
-          if (options["enable-types"] || options["enable-typeguards"])
-            typeFiles = emitTypes(context, n, {
-              types: options["enable-types"],
-              typeguards: options["enable-typeguards"],
-            });
         }
       },
     });
@@ -67,7 +89,7 @@ export async function $onEmit(context: EmitContext) {
 
     // type files
     if (options["enable-types"] || options["enable-typeguards"]) {
-      const typeFileArr = Object.entries(typeFiles);
+      const typeFileArr = Object.entries(typeFiles.files);
       for (let i = 0; i < typeFileArr.length; i++) {
         await emitFile(context.program, {
           path: resolvePath(options["out-dir"], `${typeFileArr[i][0]}.ts`),

@@ -1,5 +1,5 @@
-import {EmitContext, Model} from "@typespec/compiler";
-import {resolveScalar} from "./emit_types_resolve.js";
+import { EmitContext, Model } from "@typespec/compiler";
+import { resolveScalar } from "./emit_types_resolve.js";
 
 export const createModelGuard = (context: EmitContext, m: Model): string => {
   let ret = "";
@@ -20,6 +20,11 @@ export const createModelGuard = (context: EmitContext, m: Model): string => {
       case "Boolean":
         lineParts.push(
           `${prop[1].optional ? `arg['${prop[1].name}'] === undefined || ` : ""}typeof arg['${prop[1].name}'] === 'boolean'`,
+        );
+        break;
+      case "Intrinsic":
+        lineParts.push(
+          `${prop[1].optional ? `arg['${prop[1].name}'] === undefined || ` : ""}arg['${prop[1].name}'] === ${prop[1].type.name}`,
         );
         break;
       case "Number":
@@ -47,7 +52,7 @@ export const createModelGuard = (context: EmitContext, m: Model): string => {
         );
         break;
       case "Union":
-        // Unions are not yet checked
+        // Unions are not yet supported
         break;
       default:
         console.warn("Could not resolve type:", prop[1].type.kind);

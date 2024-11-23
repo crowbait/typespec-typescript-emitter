@@ -13,6 +13,7 @@ It can the following things:
   - exports models, enums and unions
   - does NOT export aliases (see below)
 - optional typeguards, *if* type export is enabled
+  - referenced or generated in the routes object as well, if enabled (experimental)
 - for `TypeSpec.Http`: ts file containing a nested object containing information about every route
   - this can be imported at runtime to provide a robust way of eg. accessing URLs
 
@@ -44,6 +45,7 @@ options:
     enable-types: true
     enable-typeguards: false
     enable-routes: false
+    typeguards-in-routes: true
 ```
 
 The following options are available:
@@ -53,6 +55,7 @@ The following options are available:
 - `enable-types` (default: true): enables output of TypeScript types.
 - `enable-typeguards` (default: false): enables output of typeguards, *IF* type-output is enabled.
 - `enable-routes` (default: false): enables output of the HTTP-routes object.
+- `typeguards-in-routes` (default: false) **Experimental**: generates or references typeguards in the routes object, *IF* types, typeguards *and* routes are enabled.
 
 ## Types emitter
 
