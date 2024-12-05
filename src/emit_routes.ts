@@ -20,24 +20,6 @@ const emitRoutes = (
   const rootNode = `routes_${context.options["root-namespace"]}`;
   const imports: Array<{ model: string; importStatement: string }> = [];
   let out = autogenerateWarning;
-
-  out +=
-    "/** This type is mostly meant for use in function signatures and `extends`' in generic functions.\n";
-  out += "  * eg: `const callApi(route: IRoute) => fetch(route.getUrl(...))`\n";
-  out +=
-    "  * It should not be used to type variables (eg.: `let x: IRoute`), because the resulting type\n";
-  out += "  * loses it's information about the getUrl parameters.\n";
-  out += "  */\n";
-  out += "export interface IRoute {\n";
-  out += "  method: string\n";
-  /* The "getUrl" type should really be more specific; something that at least shows that it's a Record.
-   * However, doing that, Typescript always complains about the actual fields (of an implemented function in the output)
-   * is missing from the type. I think, it's a TS issue...
-   */
-  out += "  getUrl: (p: any) => string\n";
-  out += "  auth: boolean | 'varies'\n";
-  out += "};\n\n";
-
   out += `const ${rootNode} = {\n`;
 
   const traverseNamespace = (n: Namespace, nestLevel: number): void => {
