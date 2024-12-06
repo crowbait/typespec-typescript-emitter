@@ -164,18 +164,19 @@ const emitRoutes = (
           );
         } else out = out.addLine("isRequestType: null,", nestLevel + 2);
 
-        // TODO check: filters void?
-        // TODO what the fuck is going on with robots, spec, doc (spec, not docs), etc..?
-        // TODO filter everything not from root namespace / child of root namespace (Unauthorized and shit like that)
         if (
           op.returnType &&
           op.returnType.kind &&
           op.returnType.kind !== "Intrinsic"
         ) {
-          out = out.addLine(
-            `isResponseType: ${getTypeguard(op.returnType) || "null"}`,
-            nestLevel + 2,
-          );
+          let str = "null";
+          if (op.returnType.kind === "Model" && op.returnType.name === "") {
+            if (op.returnType.properties.has("body")) {
+              str = getTypeguard(op.returnType.properties.get("body")!.type);
+            }
+            // else: stays 'null'
+          } else str = getTypeguard(op.returnType);
+          out = out.addLine(`isResponseType: ${str || "null"}`, nestLevel + 2);
         } else out = out.addLine("isResponseType: null", nestLevel + 2);
       }
 

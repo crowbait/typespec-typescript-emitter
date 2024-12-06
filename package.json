@@ -35,7 +35,7 @@
     "@typespec/http": "^0.62.0"
   },
   "scripts": {
-    "build": "npm run format && rimraf dist && tsc",
+    "build": "rimraf dist && tsc",
     "watch": "tsc --watch",
     "test": "npm run build && node --test",
     "lint": "eslint src/ test/ --report-unused-disable-directives --max-warnings=0",
