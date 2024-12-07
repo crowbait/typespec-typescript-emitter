@@ -184,12 +184,6 @@ namespace myProject { // remember to set in config!
 
 ```ts
 /* /path/to/outdir/routes_{root-namespace}.ts */
-export interface IRoute {
-  method: string,
-  getUrl: (p: any) => string,
-  auth: boolean | 'varies'
-};
-
 export const routes_myProject = {
   getSomething: {
     method: 'get',
@@ -210,11 +204,3 @@ export const routes_myProject = {
   }
 } as const;
 ```
-
-The `IRoute` interface should be used with caution. Consider the following:
-
-```ts
-const foo: IRoute = routes_myProject.some.route;
-```
-
-Now `foo.getUrl` will have lost its signature and your IDE can no longer suggest its parameters (if any).
