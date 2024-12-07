@@ -13,7 +13,7 @@ export const createModelGuard = (context: EmitContext, m: Model): string => {
       case "Model":
         if (prop[1].type.name === "Array") {
           lineParts.push(
-            `${prop[1].optional ? `arg['${prop[1].name}'] === undefined || ` : ""} Array.isArray(arg['${prop[1].name}'])`,
+            `${prop[1].optional ? `arg['${prop[1].name}'] === undefined || ` : ""}Array.isArray(arg['${prop[1].name}'])`,
           );
         } // else typeStr = resolveModel(context, t, nestlevel + 1);
         break;
