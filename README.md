@@ -125,6 +125,9 @@ export function isBook(arg: any): arg is Book {
 // the other namespace will be emitted to `/path/to/outdir/SubNameSpace.ts`
 ```
 
+Typeguards *should* create comprehensive checks that adhere as strictly to the source model as possible.
+If you find a case where the typeguard is looser than it needs to be, please report that as a bug.
+
 ### Alias's
 
 There seems to be no way to extract aliases from TypeSpec's emitter framework. Because of that, `Alias`'s are ignored by the emitter (or, to be more precise: `Alias`'s reach the emitter already resolved. They won't be exported as their own type but directly substituted where they're needed).
@@ -160,12 +163,14 @@ Example:
 @server("https://api.example.com", "Server")
 namespace myProject { // remember to set in config!
   @get
-  op getSomething(): string;
+  op getSomething(): {@body body: string};
+  // if you want to use `typeguards-in-routes`, make sure
+  // to properly declare responses as a model with a `body`-property
 
   @get
   @route("{param}")
   @useAuth(NoAuth | BasicAuth)
-  op getSmthElse(@path param: string): string;
+  op getSmthElse(@path param: string): {@body body: string};
 
   @route("/subroute")
   namespace sub {
@@ -175,7 +180,7 @@ namespace myProject { // remember to set in config!
     op postSomething(
       @path post_param: int32,
       @body body: string
-    ): string;
+    ): {@body body: string};
   }
 }
 ```
@@ -188,18 +193,27 @@ export const routes_myProject = {
   getSomething: {
     method: 'get',
     getUrl: () => 'https://api.example.com/',
-    auth: false
+    auth: false,
+    // with `typeguards-in-routes`
+    isRequestType: null,
+    isResponseType: (arg: any): boolean => typeof arg === 'string'
   },
   getSmthElse: {
     method: 'get',
     getUrl: (p: {param: string}) => `https://api.example.com/${p.param}`,
-    auth: 'varies'
+    auth: 'varies',
+    // with `typeguards-in-routes`
+    isRequestType: null,
+    isResponseType: (arg: any): boolean => typeof arg === 'string'
   },
   sub: {
     postSomething: {
       method: 'post',
       getUrl: (p: {post_param: string}) => `https://api.example.com/subroute/post/${p.post_param}`,
-      auth: true
+      auth: true,
+      // with `typeguards-in-routes`
+      isRequestType: (arg: any): boolean => typeof arg === 'string',
+      isResponseType: (arg: any): boolean => typeof arg === 'string'
     }
   }
 } as const;

@@ -1,12 +1,12 @@
 import {
-  ArrayModelType,
   EmitContext,
   getDoc,
+  Model,
   Namespace,
   Type,
 } from "@typespec/compiler";
 import { getAuthentication, getHttpOperation, HttpAuth } from "@typespec/http";
-import { resolveScalar } from "./emit_types_resolve.js";
+import { getTypeguard } from "./emit_types_typeguards.js";
 import autogenerateWarning from "./helper_autogenerateWarning.js";
 import { EmitterOptions } from "./lib.js";
 
@@ -15,10 +15,10 @@ const emitRoutes = (
   namespace: Namespace,
   rootServer: string,
   options: EmitterOptions,
-  typeguardedNames: string[],
+  knownTypeguards: Array<{ filename: string; name: string }>,
 ): string => {
   const rootNode = `routes_${context.options["root-namespace"]}`;
-  const imports: Array<{ model: string; importStatement: string }> = [];
+  const imports: string[] = [];
   let out = autogenerateWarning;
   out += `const ${rootNode} = {\n`;
 
@@ -89,79 +89,37 @@ const emitRoutes = (
       );
 
       // typeguards
-      const getTypeguard = (t: Type): string => {
-        switch (t.kind) {
-          case "Model":
-            if (t.name !== "Array") {
-              if (!typeguardedNames.includes(t.name)) {
-                if (t.name) return "";
-                return "(arg: any) => typeof arg === 'object'";
-              }
-              if (!imports.some((x) => x.model === t.name))
-                imports.push({
-                  model: t.name,
-                  importStatement: `import {is${t.name}} from './${n.name.charAt(0).toUpperCase() + n.name.slice(1)}';`,
-                });
-              return `is${t.name}`;
-            } else {
-              const typeguard = getTypeguard(
-                (t as ArrayModelType).indexer.value,
-              );
-              if (!typeguard) return "";
-              return `(arg: any) => (Array.isArray(arg) && ( arg.every((x) => (${typeguard})(x)) ) )`;
-            }
-          case "Boolean":
-            return `(arg: any) => typeof arg === 'boolean'`;
-          case "Intrinsic":
-            if (t.name === "void") return "";
-            return `(arg: any) => arg === ${t.name}`;
-          case "Number":
-            return `(arg: any) => typeof arg === 'number'`;
-          case "Scalar":
-            if (
-              resolveScalar(t) !== "Date" &&
-              resolveScalar(t) !== "Uint8Array"
-            ) {
-              return `(arg: any) => typeof arg === '${resolveScalar(t)}'`;
-            } else {
-              return `(arg: any) => typeof arg === 'object'`;
-            }
-          case "String":
-            return `(arg: any) => typeof arg === 'string'`;
-          case "Tuple": {
-            const typeguards = t.values
-              .map((v) => getTypeguard(v))
-              .filter((v) => !!v);
-            if (typeguards.length === 0) return "";
-            return `(arg: any) => Array.isArray(arg) && (${typeguards.map((v, i) => `(${v})(arg[${i}])`).join(" && ")})`;
-          }
-          case "Union": {
-            const typeguards = Array.from(t.variants)
-              .map((v) => getTypeguard(v[1].type))
-              .filter((x) => !!x)
-              .map((v) => `((${v})(arg))`)
-              .join(" || ");
-            if (!typeguards) return "";
-            return `(arg: any) => (${typeguards})`;
-          }
-
-          default:
-            return "null";
-        }
+      const typeguardLines = (t: Type): string[] => {
+        const guard = getTypeguard(t, "arg", 0, knownTypeguards);
+        imports.push(...guard[1]);
+        return guard[0].split("\n");
       };
 
       if (options["typeguards-in-routes"]) {
-        if (!typeguardedNames) {
+        if (!knownTypeguards) {
           console.warn(
             "Typeguard Names List was empty when it shouldn't have been.",
           );
           return;
         }
         if (op.parameters.properties.has("body")) {
-          out = out.addLine(
-            `isRequestType: ${getTypeguard(op.parameters.properties.get("body")!.type) || "null"},`,
-            nestLevel + 2,
+          const lines = typeguardLines(
+            op.parameters.properties.get("body")!.type,
           );
+          out = out.addLine(
+            `isRequestType: ${lines.length === 0 ? "null" : `(arg: any): boolean => ${lines.shift()}`}${lines.length < 1 ? "," : ""}`,
+            nestLevel + 2,
+            lines.length === 1,
+          );
+          if (lines.length > 0) {
+            lines[lines.length - 1] += ",";
+            lines.forEach((line, i, arr) => {
+              out = out.addLine(
+                line,
+                lines.length > 1 ? nestLevel + (i < arr.length - 1 ? 3 : 2) : 0,
+              );
+            });
+          }
         } else out = out.addLine("isRequestType: null,", nestLevel + 2);
 
         if (
@@ -169,14 +127,32 @@ const emitRoutes = (
           op.returnType.kind &&
           op.returnType.kind !== "Intrinsic"
         ) {
-          let str = "null";
-          if (op.returnType.kind === "Model" && op.returnType.name === "") {
-            if (op.returnType.properties.has("body")) {
-              str = getTypeguard(op.returnType.properties.get("body")!.type);
+          const lines: string[] = [];
+          const addModelLines = (m: Model): void => {
+            if (m.properties.has("body")) {
+              lines.push(...typeguardLines(m.properties.get("body")!.type));
+              // else (no "body" prop): stays empty -> 'null'
+              // why?: unnamed model return type is likely to be / should be
+              //   headers'n'stuff, so if there is no "body" property, play it safe
             }
-            // else: stays 'null'
-          } else str = getTypeguard(op.returnType);
-          out = out.addLine(`isResponseType: ${str || "null"}`, nestLevel + 2);
+          };
+          if (op.returnType.kind === "Union") {
+            op.returnType.variants.forEach((v) => {
+              if (v.type.kind === "Model") addModelLines(v.type);
+            });
+          }
+          if (op.returnType.kind === "Model") addModelLines(op.returnType);
+          out = out.addLine(
+            `isResponseType: ${lines.length === 0 ? "null" : `(arg: any): boolean => ${lines.shift()}`}${lines.length < 1 ? "," : ""}`,
+            nestLevel + 2,
+            lines.length === 1,
+          );
+          lines.forEach((line, i, arr) => {
+            out = out.addLine(
+              line,
+              lines.length > 1 ? nestLevel + (i < arr.length - 1 ? 3 : 2) : 0,
+            );
+          });
         } else out = out.addLine("isResponseType: null", nestLevel + 2);
       }
 
@@ -206,8 +182,7 @@ const emitRoutes = (
   out += "} as const;\n";
   out += `export default ${rootNode};\n`;
 
-  out = `${imports.map((x) => x.importStatement).join("\n")}\n\n${out}`;
-
+  out = `${imports.filter((x, i, arr) => arr.indexOf(x) === i).join("\n")}\n\n${out}`;
   return out;
 };
 

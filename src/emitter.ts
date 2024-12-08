@@ -91,10 +91,11 @@ export async function $onEmit(context: EmitContext) {
     if (options["enable-types"] || options["enable-typeguards"]) {
       const typeFileArr = Object.entries(typeFiles.files);
       for (let i = 0; i < typeFileArr.length; i++) {
-        await emitFile(context.program, {
-          path: resolvePath(options["out-dir"], `${typeFileArr[i][0]}.ts`),
-          content: typeFileArr[i][1],
-        });
+        if (typeFileArr[i][1])
+          await emitFile(context.program, {
+            path: resolvePath(options["out-dir"], `${typeFileArr[i][0]}.ts`),
+            content: typeFileArr[i][1],
+          });
       }
     }
   }

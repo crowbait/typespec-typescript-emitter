@@ -10,16 +10,6 @@ import {
   Union,
 } from "@typespec/compiler";
 
-const resolvedNames: {
-  enums: string[];
-  unions: string[];
-  models: string[];
-} = {
-  enums: [],
-  unions: [],
-  models: [],
-};
-
 export const resolveType = (
   context: EmitContext,
   t: Type,
@@ -73,8 +63,13 @@ export const resolveArray = (
   return ret;
 };
 
-export const resolveEnum = (e: Enum, nestlevel: number): string => {
-  if (e.name && resolvedNames.enums.includes(e.name)) return e.name;
+export const resolveEnum = (
+  e: Enum,
+  nestlevel: number,
+  isNamespaceRoot?: boolean,
+): string => {
+  if (e.name && !isNamespaceRoot && e.namespace?.enums.has(e.name))
+    return e.name;
   let ret = "{\n";
   let i = 1;
   e.members.forEach((p) => {
@@ -90,7 +85,6 @@ export const resolveEnum = (e: Enum, nestlevel: number): string => {
     i++;
   });
   ret = ret.addLine("}", nestlevel, true);
-  resolvedNames.enums.push(e.name);
   return ret;
 };
 
@@ -106,8 +100,10 @@ export const resolveUnion = (
   context: EmitContext,
   u: Union,
   nestlevel: number,
+  isNamespaceRoot?: boolean,
 ): string => {
-  if (u.name && resolvedNames.unions.includes(u.name)) return u.name;
+  if (u.name && !isNamespaceRoot && u.namespace?.unions.has(u.name))
+    return u.name;
   return Array.from(u.variants)
     .map((v) => resolveType(context, v[1].type, nestlevel))
     .join(" | ");
@@ -148,8 +144,10 @@ export const resolveModel = (
   context: EmitContext,
   m: Model,
   nestlevel: number = 0,
+  isNamespaceRoot?: boolean,
 ): string => {
-  if (m.name && resolvedNames.models.includes(m.name)) return m.name;
+  if (m.name && !isNamespaceRoot && m.namespace?.models.has(m.name))
+    return m.name;
   let ret = "{\n";
   let i = 1;
   m.properties.forEach((p) => {
@@ -165,6 +163,5 @@ export const resolveModel = (
     i++;
   });
   ret = ret.addLine("}", nestlevel, true);
-  resolvedNames.models.push(m.name);
   return ret;
 };
