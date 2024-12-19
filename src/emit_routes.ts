@@ -35,7 +35,10 @@ const emitRoutes = (
       out = out.addLine(`${op.name}: {`, nestLevel + 1);
 
       // http method
-      out = out.addLine(`method: '${httpOp[0].verb}',`, nestLevel + 2);
+      out = out.addLine(
+        `method: '${httpOp[0].verb.toUpperCase()}',`,
+        nestLevel + 2,
+      );
 
       // url parameters
       const pathParams = httpOp[0].parameters.parameters.filter(
