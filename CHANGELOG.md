@@ -1,3 +1,12 @@
+## [0.3.1](https://github.com/crowbait/typespec-typescript-emitter/compare/v0.3.0...v0.3.1) (2024-12-19)
+
+
+### Bug Fixes
+
+* upper case HTTP verbs in routes ([00978ff](https://github.com/crowbait/typespec-typescript-emitter/commit/00978ff4f179fec336d0339b9038d2e2234a0574))
+
+
+
 # [0.3.0](https://github.com/crowbait/typespec-typescript-emitter/compare/v0.2.0...v0.3.0) (2024-12-08)
 
 
