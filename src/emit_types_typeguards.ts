@@ -60,6 +60,19 @@ export const getTypeguard = (
           `Array.isArray(${accessor}) && ${accessor}.every((v) => ${guard[0]})`,
           guard[1],
         ];
+      } else if (t.name === "Record") {
+        const guard = getTypeguard(
+          t.indexer!.value,
+          "v",
+          nestingLevel,
+          knownGuards,
+        );
+        if (guard[0].endsWith("\n"))
+          guard[0] = guard[0].substring(0, guard[0].length - 1);
+        return [
+          `typeof ${accessor} === 'object' && (Object.entries(${accessor}).length > 0 ? Object.values(${accessor} as Record<string, any>).every((v) => ${guard[0]}) : true)`,
+          guard[1],
+        ];
       } else if (knownGuards && knownGuards.some((x) => x.name === t.name)) {
         return [
           `is${t.name}(${accessor})`,

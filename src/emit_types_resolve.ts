@@ -4,6 +4,7 @@ import {
   Enum,
   getDoc,
   Model,
+  RecordModelType,
   Scalar,
   Tuple,
   Type,
@@ -20,6 +21,8 @@ export const resolveType = (
     case "Model":
       if (t.name === "Array") {
         typeStr = resolveArray(context, t as ArrayModelType, nestlevel);
+      } else if (t.name === "Record") {
+        typeStr = resolveRecord(context, t as RecordModelType, nestlevel);
       } else typeStr = resolveModel(context, t, nestlevel + 1);
       break;
     case "Boolean":
@@ -59,8 +62,17 @@ export const resolveArray = (
 ): string => {
   if (a.name !== "Array")
     throw new Error(`Trying to parse model ${a.name} as Array`);
-  const ret = `${resolveType(context, a.indexer.value, nestlevel)}[]`;
-  return ret;
+  return `${resolveType(context, a.indexer.value, nestlevel)}[]`;
+};
+
+export const resolveRecord = (
+  context: EmitContext,
+  a: RecordModelType,
+  nestlevel: number,
+): string => {
+  if (a.name !== "Record")
+    throw new Error(`Trying to parse model ${a.name} as Record`);
+  return `Record<string, ${resolveType(context, a.indexer.value, nestlevel)}>`;
 };
 
 export const resolveEnum = (
