@@ -1,3 +1,12 @@
+## [0.3.3](https://github.com/crowbait/typespec-typescript-emitter/compare/v0.3.2...v0.3.3) (2025-01-02)
+
+
+### Bug Fixes
+
+* parsing of Record-type models ([b6e1dd9](https://github.com/crowbait/typespec-typescript-emitter/commit/b6e1dd91b94e39ad657d584f49051bc8e9e83608)), closes [#2](https://github.com/crowbait/typespec-typescript-emitter/issues/2)
+
+
+
 ## [0.3.2](https://github.com/crowbait/typespec-typescript-emitter/compare/v0.3.1...v0.3.2) (2025-01-02)
 
 
