@@ -1,3 +1,12 @@
+## [0.3.2](https://github.com/crowbait/typespec-typescript-emitter/compare/v0.3.1...v0.3.2) (2025-01-02)
+
+
+### Bug Fixes
+
+* dashes in enum names ([79926dd](https://github.com/crowbait/typespec-typescript-emitter/commit/79926dd6c1e437687ab84943c3dade74a3d0498e)), closes [#1](https://github.com/crowbait/typespec-typescript-emitter/issues/1)
+
+
+
 ## [0.3.1](https://github.com/crowbait/typespec-typescript-emitter/compare/v0.3.0...v0.3.1) (2024-12-19)
 
 
