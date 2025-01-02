@@ -79,7 +79,7 @@ export const resolveEnum = (
         : " = " +
           (typeof p.value === "string" ? `'${p.value}'` : p.value.toString());
     ret = ret.addLine(
-      `${p.name}${val}${i < e.members.size ? "," : ""}`,
+      `${p.name.includes("-") ? `'${p.name}'` : p.name}${val}${i < e.members.size ? "," : ""}`,
       nestlevel + 1,
     );
     i++;
