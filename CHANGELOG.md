@@ -1,3 +1,14 @@
+## [0.3.4](https://github.com/crowbait/typespec-typescript-emitter/compare/v0.3.3...v0.3.4) (2025-01-03)
+
+
+### Bug Fixes
+
+* model resolution if spread over multiple files ([bd34d4e](https://github.com/crowbait/typespec-typescript-emitter/commit/bd34d4ee7a7cc83c3c233ffd3ae9086db318be51))
+* model typeguard resolution if spread over mutliple files ([eab6064](https://github.com/crowbait/typespec-typescript-emitter/commit/eab606421c930d5c9a747ffbd0d1a0707608374b))
+* support recursive records ([c0bad3f](https://github.com/crowbait/typespec-typescript-emitter/commit/c0bad3f15f2f0913ef99129ce17c53a17fd0d125)), closes [#3](https://github.com/crowbait/typespec-typescript-emitter/issues/3)
+
+
+
 ## [0.3.3](https://github.com/crowbait/typespec-typescript-emitter/compare/v0.3.2...v0.3.3) (2025-01-02)
 
 
@@ -40,22 +51,6 @@
 * support for unions and nested models in typeguards ([9292107](https://github.com/crowbait/typespec-typescript-emitter/commit/92921073ad83a1cec74d7b7595cb178120cdc32b))
 * typeguards ([8dc3eef](https://github.com/crowbait/typespec-typescript-emitter/commit/8dc3eef62c4d9bc0df71d7878ada52254ed1475a))
 * typeguards in routes ([010388a](https://github.com/crowbait/typespec-typescript-emitter/commit/010388a2ff1c0c53ce34828e4197e31ada745e83))
-
-
-
-# [0.2.0](https://github.com/crowbait/typespec-typescript-emitter/compare/fdafc1c081058e9d683946b010d10ff3bd962cdc...v0.2.0) (2024-11-12)
-
-
-### Bug Fixes
-
-* warning log level ([8b74b01](https://github.com/crowbait/typespec-typescript-emitter/commit/8b74b0197ed4b8fa3aad57d0f50cb884af879243))
-
-
-### Features
-
-* routes emitter ([fdafc1c](https://github.com/crowbait/typespec-typescript-emitter/commit/fdafc1c081058e9d683946b010d10ff3bd962cdc))
-* support optional model properties ([729d9f1](https://github.com/crowbait/typespec-typescript-emitter/commit/729d9f125434ead7a33326014082cd172c79f2ff))
-* types emitter ([e31d459](https://github.com/crowbait/typespec-typescript-emitter/commit/e31d459edce08d010e590681e3a2e17d636de64e))
 
 
 
