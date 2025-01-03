@@ -33,7 +33,7 @@ const emitTypes = (
     });
     n.unions.forEach((u) => {
       if (options["enable-types"]) {
-        const resolved = resolveUnion(context, u, 0, true);
+        const resolved = resolveUnion(context, u, 0, n, true);
         if (resolved) {
           const doc = getDoc(context.program, u);
           if (doc) file = file.addLine(`/** ${doc} */`);
@@ -43,7 +43,7 @@ const emitTypes = (
     });
     n.models.forEach((m) => {
       if (options["enable-types"]) {
-        const resolved = resolveModel(context, m, 0, true);
+        const resolved = resolveModel(context, m, 0, n, true);
         if (resolved) {
           const doc = getDoc(context.program, m);
           if (doc) file = file.addLine(`/** ${doc} */`);

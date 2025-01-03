@@ -4,6 +4,7 @@ import {
   Enum,
   getDoc,
   Model,
+  Namespace,
   RecordModelType,
   Scalar,
   Tuple,
@@ -15,15 +16,27 @@ export const resolveType = (
   context: EmitContext,
   t: Type,
   nestlevel: number,
+  currentNamespace: Namespace,
 ): string => {
   let typeStr = "unknown";
   switch (t.kind) {
     case "Model":
       if (t.name === "Array") {
-        typeStr = resolveArray(context, t as ArrayModelType, nestlevel);
+        typeStr = resolveArray(
+          context,
+          t as ArrayModelType,
+          nestlevel,
+          currentNamespace,
+        );
       } else if (t.name === "Record") {
-        typeStr = resolveRecord(context, t as RecordModelType, nestlevel);
-      } else typeStr = resolveModel(context, t, nestlevel + 1);
+        typeStr = resolveRecord(
+          context,
+          t as RecordModelType,
+          nestlevel,
+          currentNamespace,
+        );
+      } else
+        typeStr = resolveModel(context, t, nestlevel + 1, currentNamespace);
       break;
     case "Boolean":
       typeStr = "boolean";
@@ -44,10 +57,10 @@ export const resolveType = (
       typeStr = `'${t.value}'`;
       break;
     case "Tuple":
-      typeStr = resolveTuple(context, t, nestlevel);
+      typeStr = resolveTuple(context, t, nestlevel, currentNamespace);
       break;
     case "Union":
-      typeStr = resolveUnion(context, t, nestlevel);
+      typeStr = resolveUnion(context, t, nestlevel, currentNamespace);
       break;
     default:
       console.warn("Could not resolve type:", t.kind);
@@ -59,20 +72,22 @@ export const resolveArray = (
   context: EmitContext,
   a: ArrayModelType,
   nestlevel: number,
+  currentNamespace: Namespace,
 ): string => {
   if (a.name !== "Array")
     throw new Error(`Trying to parse model ${a.name} as Array`);
-  return `${resolveType(context, a.indexer.value, nestlevel)}[]`;
+  return `${resolveType(context, a.indexer.value, nestlevel, currentNamespace)}[]`;
 };
 
 export const resolveRecord = (
   context: EmitContext,
   a: RecordModelType,
   nestlevel: number,
+  currentNamespace: Namespace,
 ): string => {
   if (a.name !== "Record")
     throw new Error(`Trying to parse model ${a.name} as Record`);
-  return `{[k: string]: ${resolveType(context, a.indexer.value, nestlevel)}}`;
+  return `{[k: string]: ${resolveType(context, a.indexer.value, nestlevel, currentNamespace)}}`;
 };
 
 export const resolveEnum = (
@@ -104,20 +119,22 @@ export const resolveTuple = (
   context: EmitContext,
   t: Tuple,
   nestlevel: number,
+  currentNamespace: Namespace,
 ): string => {
-  return `[${t.values.map((v) => resolveType(context, v, nestlevel)).join(", ")}]`;
+  return `[${t.values.map((v) => resolveType(context, v, nestlevel, currentNamespace)).join(", ")}]`;
 };
 
 export const resolveUnion = (
   context: EmitContext,
   u: Union,
   nestlevel: number,
+  currentNamespace: Namespace,
   isNamespaceRoot?: boolean,
 ): string => {
   if (u.name && !isNamespaceRoot && u.namespace?.unions.has(u.name))
     return u.name;
   return Array.from(u.variants)
-    .map((v) => resolveType(context, v[1].type, nestlevel))
+    .map((v) => resolveType(context, v[1].type, nestlevel, currentNamespace))
     .join(" | ");
 };
 export const resolveScalar = (s: Scalar): string => {
@@ -156,16 +173,18 @@ export const resolveModel = (
   context: EmitContext,
   m: Model,
   nestlevel: number = 0,
+  currentNamespace: Namespace,
   isNamespaceRoot?: boolean,
 ): string => {
-  if (m.name && !isNamespaceRoot && m.namespace?.models.has(m.name))
+  console.log(m.namespace!.name);
+  if (m.name && !isNamespaceRoot && currentNamespace.namespace === m.namespace)
     return m.name;
   let ret = "{\n";
   let i = 1;
   m.properties.forEach((p) => {
     const doc = getDoc(context.program, p);
     if (doc) ret = ret.addLine(`/** ${doc} */`, nestlevel + 1);
-    const typeStr = resolveType(context, p.type, nestlevel);
+    const typeStr = resolveType(context, p.type, nestlevel, currentNamespace);
     if (typeStr.includes("unknown"))
       console.warn(`Could not resolve property ${p.name} on ${m.name}`);
     ret = ret.addLine(
