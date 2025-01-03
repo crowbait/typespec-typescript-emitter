@@ -93,7 +93,7 @@ const emitRoutes = (
 
       // typeguards
       const typeguardLines = (t: Type): string[] => {
-        const guard = getTypeguard(t, "arg", 0, knownTypeguards);
+        const guard = getTypeguard(t, "arg", 0, n, knownTypeguards);
         imports.push(...guard[1]);
         return guard[0].split("\n");
       };

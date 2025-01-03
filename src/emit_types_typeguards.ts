@@ -1,10 +1,11 @@
-import { Model, Type } from "@typespec/compiler";
+import { Model, Namespace, Type } from "@typespec/compiler";
 import { resolveScalar } from "./emit_types_resolve.js";
 
 export const getTypeguardModel = (
   m: Model,
   accessor: string,
   nestingLevel = 1,
+  currentNamespace: Namespace,
   knownGuards?: Array<{ filename: string; name: string }>,
 ): [string, string[]] => {
   const imports: string[] = [];
@@ -15,6 +16,7 @@ export const getTypeguardModel = (
           property[1].type,
           `${accessor}['${property[1].name}']`,
           nestingLevel + 1,
+          currentNamespace,
           knownGuards,
         );
         imports.push(...guard[1]);
@@ -43,6 +45,7 @@ export const getTypeguard = (
   t: Type,
   accessor: string,
   nestingLevel = 1,
+  currentNamespace: Namespace,
   knownGuards?: Array<{ filename: string; name: string }>,
 ): [string, string[]] => {
   switch (t.kind) {
@@ -52,6 +55,7 @@ export const getTypeguard = (
           t.indexer!.value,
           "v",
           nestingLevel,
+          currentNamespace,
           knownGuards,
         );
         if (guard[0].endsWith("\n"))
@@ -65,6 +69,7 @@ export const getTypeguard = (
           t.indexer!.value,
           "v",
           nestingLevel,
+          currentNamespace,
           knownGuards,
         );
         if (guard[0].endsWith("\n"))
@@ -80,10 +85,20 @@ export const getTypeguard = (
             `import {is${t.name}} from './${knownGuards.find((x) => x.name === t.name)!.filename}';`,
           ],
         ];
-      } else if (t.name && !knownGuards && t.namespace?.models.has(t.name)) {
+      } else if (
+        t.name &&
+        !knownGuards &&
+        currentNamespace.name === t.namespace!.name
+      ) {
         return [`is${t.name}(${accessor})`, []];
       } else {
-        const guard = getTypeguardModel(t, accessor, nestingLevel, knownGuards);
+        const guard = getTypeguardModel(
+          t,
+          accessor,
+          nestingLevel,
+          currentNamespace,
+          knownGuards,
+        );
         return [
           `(\n${guard[0]}\n${"  ".repeat(Math.max(nestingLevel - 1, 0))})`,
           guard[1],
@@ -116,6 +131,7 @@ export const getTypeguard = (
               v,
               `${accessor}[${i}]`,
               nestingLevel,
+              currentNamespace,
               knownGuards,
             );
             imports.push(...guard[1]);
@@ -134,6 +150,7 @@ export const getTypeguard = (
               v[1].type,
               `${accessor}`,
               nestingLevel,
+              currentNamespace,
               knownGuards,
             );
             imports.push(...guard[1]);

@@ -176,7 +176,6 @@ export const resolveModel = (
   currentNamespace: Namespace,
   isNamespaceRoot?: boolean,
 ): string => {
-  console.log(m.namespace!.name);
   if (m.name && !isNamespaceRoot && currentNamespace.namespace === m.namespace)
     return m.name;
   let ret = "{\n";
