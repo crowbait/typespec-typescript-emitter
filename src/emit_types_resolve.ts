@@ -72,7 +72,7 @@ export const resolveRecord = (
 ): string => {
   if (a.name !== "Record")
     throw new Error(`Trying to parse model ${a.name} as Record`);
-  return `Record<string, ${resolveType(context, a.indexer.value, nestlevel)}>`;
+  return `{[k: string]: ${resolveType(context, a.indexer.value, nestlevel)}}`;
 };
 
 export const resolveEnum = (
