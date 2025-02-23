@@ -31,8 +31,8 @@
     "typescript-eslint": "^8.15.0"
   },
   "peerDependencies": {
-    "@typespec/compiler": "^0.62.0",
-    "@typespec/http": "^0.62.0"
+    "@typespec/compiler": "0.x",
+    "@typespec/http": "0.x"
   },
   "scripts": {
     "build": "rimraf dist && tsc",
