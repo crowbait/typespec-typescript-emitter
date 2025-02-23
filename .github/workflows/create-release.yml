@@ -14,6 +14,7 @@ jobs:
         uses: TriPSs/conventional-changelog-action@v5.4.0
         with:
           github-token: ${{ secrets.GH_TOKEN }}
+          skip-on-empty: false
       - name: Create Release
         uses: actions/create-release@v1
         if: ${{ steps.changelog.outputs.skipped == 'false' }}
