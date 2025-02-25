@@ -86,7 +86,7 @@ export async function $onEmit(context: EmitContext) {
           options["out-dir"],
           `routes_${options["root-namespace"]}.ts`,
         ),
-        content: routesObject,
+        content: `/* eslint-disable */\n${routesObject}`,
       });
     }
 
@@ -97,7 +97,7 @@ export async function $onEmit(context: EmitContext) {
         if (typeFileArr[i][1])
           await emitFile(context.program, {
             path: resolvePath(options["out-dir"], `${typeFileArr[i][0]}.ts`),
-            content: typeFileArr[i][1],
+            content: `/* eslint-disable */\n${typeFileArr[i][1]}`,
           });
       }
     }

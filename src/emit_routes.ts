@@ -19,7 +19,7 @@ const emitRoutes = (
 ): string => {
   const rootNode = `routes_${context.options["root-namespace"]}`;
   const imports: string[] = [];
-  let out = `/* eslint-disable */\n${autogenerateWarning}`;
+  let out = autogenerateWarning;
   out += `const ${rootNode} = {\n`;
 
   const traverseNamespace = (n: Namespace, nestLevel: number): void => {
