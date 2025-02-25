@@ -45,6 +45,7 @@ options:
     enable-types: true
     enable-typeguards: false
     enable-routes: false
+    relative-routes: false
     typeguards-in-routes: true
 ```
 
@@ -55,6 +56,7 @@ The following options are available:
 - `enable-types` (default: true): enables output of TypeScript types.
 - `enable-typeguards` (default: false): enables output of typeguards, *IF* type-output is enabled.
 - `enable-routes` (default: false): enables output of the HTTP-routes object.
+- `relative-routes` (default: false): emits URLs in the routes object relative to the server's address (as opposed to a fully qualified URL when set to false).
 - `typeguards-in-routes` (default: false) **Experimental**: generates or references typeguards in the routes object, *IF* types, typeguards *and* routes are enabled.
 
 ## Types emitter
@@ -152,9 +154,7 @@ model Derived2 {...OmitProperties<Demo, "prop1">};
 **This emitter depends on your use of the `TypeSpec.Http` library**.
 
 If you're using `TypeSpec.Http` to define your API routes and endpoints, this library offers an emitter to export a `routes` object.
-
-It is strongly advised to define a `server`, to make URL generation more meaningful. The way this is implemented however, will currently only work well for 'simpler' projects using one root domain.
-
+The way this is implemented, it will currently only work well for 'simpler' projects using one root domain.
 Just as the types emitter, this emitter will also preserve docs as JSDoc-style comments.
 
 Example:

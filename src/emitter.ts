@@ -39,6 +39,9 @@ export async function $onEmit(context: EmitContext) {
         (context.options["enable-typeguards"] ?? false) &&
         (context.options["enable-routes"] ?? false) &&
         (context.options["typeguards-in-routes"] ?? false),
+      "relative-routes":
+        (context.options["enable-routes"] ?? false) &&
+        (context.options["relative-routes"] ?? false),
     };
 
     console.log(`Writing routes to ${options["out-dir"]}`);

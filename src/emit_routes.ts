@@ -19,7 +19,7 @@ const emitRoutes = (
 ): string => {
   const rootNode = `routes_${context.options["root-namespace"]}`;
   const imports: string[] = [];
-  let out = autogenerateWarning;
+  let out = `/* eslint-disable */\n${autogenerateWarning}`;
   out += `const ${rootNode} = {\n`;
 
   const traverseNamespace = (n: Namespace, nestLevel: number): void => {
@@ -53,12 +53,12 @@ const emitRoutes = (
         fn += pathParams.reduce(
           (sum, cur) =>
             sum.replaceAll(`{${cur.name}}`, `${"$"}{p.${cur.name}}`),
-          `\`${rootServer}${httpOp[0].path}\`,`,
+          `\`${!options["relative-routes"] ? rootServer : ""}${httpOp[0].path}\`,`,
         );
         out = out.addLine(fn, nestLevel + 2);
       } else {
         out = out.addLine(
-          `getUrl: () => '${rootServer}${httpOp[0].path}',`,
+          `getUrl: () => '${!options["relative-routes"] ? rootServer : ""}${httpOp[0].path}',`,
           nestLevel + 2,
         );
       }
