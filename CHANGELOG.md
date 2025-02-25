@@ -1,3 +1,12 @@
+## [0.4.1](https://github.com/crowbait/typespec-typescript-emitter/compare/v0.4.0...v0.4.1) (2025-02-25)
+
+
+### Bug Fixes
+
+* fixed eslint ignore directives ([9c0477a](https://github.com/crowbait/typespec-typescript-emitter/commit/9c0477a6925715b99c38d4133d04ee774a0a65f7))
+
+
+
 # [0.4.0](https://github.com/crowbait/typespec-typescript-emitter/compare/v0.3.5...v0.4.0) (2025-02-25)
 
 
@@ -33,15 +42,6 @@
 ### Bug Fixes
 
 * parsing of Record-type models ([b6e1dd9](https://github.com/crowbait/typespec-typescript-emitter/commit/b6e1dd91b94e39ad657d584f49051bc8e9e83608)), closes [#2](https://github.com/crowbait/typespec-typescript-emitter/issues/2)
-
-
-
-## [0.3.2](https://github.com/crowbait/typespec-typescript-emitter/compare/v0.3.1...v0.3.2) (2025-01-02)
-
-
-### Bug Fixes
-
-* dashes in enum names ([79926dd](https://github.com/crowbait/typespec-typescript-emitter/commit/79926dd6c1e437687ab84943c3dade74a3d0498e)), closes [#1](https://github.com/crowbait/typespec-typescript-emitter/issues/1)
 
 
 
