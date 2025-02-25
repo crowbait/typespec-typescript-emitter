@@ -1,3 +1,12 @@
+# [0.4.0](https://github.com/crowbait/typespec-typescript-emitter/compare/v0.3.5...v0.4.0) (2025-02-25)
+
+
+### Features
+
+* option to emit relative URLs in routes object ([be50613](https://github.com/crowbait/typespec-typescript-emitter/commit/be50613ac94550899805faf2555b3f407d88be33))
+
+
+
 ## [0.3.5](https://github.com/crowbait/typespec-typescript-emitter/compare/v0.3.4...v0.3.5) (2025-02-23)
 
 
@@ -33,15 +42,6 @@
 ### Bug Fixes
 
 * dashes in enum names ([79926dd](https://github.com/crowbait/typespec-typescript-emitter/commit/79926dd6c1e437687ab84943c3dade74a3d0498e)), closes [#1](https://github.com/crowbait/typespec-typescript-emitter/issues/1)
-
-
-
-## [0.3.1](https://github.com/crowbait/typespec-typescript-emitter/compare/v0.3.0...v0.3.1) (2024-12-19)
-
-
-### Bug Fixes
-
-* upper case HTTP verbs in routes ([00978ff](https://github.com/crowbait/typespec-typescript-emitter/commit/00978ff4f179fec336d0339b9038d2e2234a0574))
 
 
 
