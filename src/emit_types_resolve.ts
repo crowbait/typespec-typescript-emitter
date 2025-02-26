@@ -13,30 +13,30 @@ import {
 } from "@typespec/compiler";
 
 export const resolveType = (
-  context: EmitContext,
   t: Type,
   nestlevel: number,
   currentNamespace: Namespace,
+  context?: EmitContext,
 ): string => {
   let typeStr = "unknown";
   switch (t.kind) {
     case "Model":
       if (t.name === "Array") {
         typeStr = resolveArray(
-          context,
           t as ArrayModelType,
           nestlevel,
           currentNamespace,
+          context,
         );
       } else if (t.name === "Record") {
         typeStr = resolveRecord(
-          context,
           t as RecordModelType,
           nestlevel,
           currentNamespace,
+          context,
         );
       } else
-        typeStr = resolveModel(context, t, nestlevel + 1, currentNamespace);
+        typeStr = resolveModel(t, nestlevel + 1, currentNamespace, context);
       break;
     case "Boolean":
       typeStr = "boolean";
@@ -57,10 +57,10 @@ export const resolveType = (
       typeStr = `'${t.value}'`;
       break;
     case "Tuple":
-      typeStr = resolveTuple(context, t, nestlevel, currentNamespace);
+      typeStr = resolveTuple(t, nestlevel, currentNamespace, context);
       break;
     case "Union":
-      typeStr = resolveUnion(context, t, nestlevel, currentNamespace);
+      typeStr = resolveUnion(t, nestlevel, currentNamespace, context);
       break;
     default:
       console.warn("Could not resolve type:", t.kind);
@@ -69,25 +69,25 @@ export const resolveType = (
 };
 
 export const resolveArray = (
-  context: EmitContext,
   a: ArrayModelType,
   nestlevel: number,
   currentNamespace: Namespace,
+  context?: EmitContext,
 ): string => {
   if (a.name !== "Array")
     throw new Error(`Trying to parse model ${a.name} as Array`);
-  return `${resolveType(context, a.indexer.value, nestlevel, currentNamespace)}[]`;
+  return `${resolveType(a.indexer.value, nestlevel, currentNamespace, context)}[]`;
 };
 
 export const resolveRecord = (
-  context: EmitContext,
   a: RecordModelType,
   nestlevel: number,
   currentNamespace: Namespace,
+  context?: EmitContext,
 ): string => {
   if (a.name !== "Record")
     throw new Error(`Trying to parse model ${a.name} as Record`);
-  return `{[k: string]: ${resolveType(context, a.indexer.value, nestlevel, currentNamespace)}}`;
+  return `{[k: string]: ${resolveType(a.indexer.value, nestlevel, currentNamespace, context)}}`;
 };
 
 export const resolveEnum = (
@@ -116,25 +116,25 @@ export const resolveEnum = (
 };
 
 export const resolveTuple = (
-  context: EmitContext,
   t: Tuple,
   nestlevel: number,
   currentNamespace: Namespace,
+  context?: EmitContext,
 ): string => {
-  return `[${t.values.map((v) => resolveType(context, v, nestlevel, currentNamespace)).join(", ")}]`;
+  return `[${t.values.map((v) => resolveType(v, nestlevel, currentNamespace, context)).join(", ")}]`;
 };
 
 export const resolveUnion = (
-  context: EmitContext,
   u: Union,
   nestlevel: number,
   currentNamespace: Namespace,
+  context?: EmitContext,
   isNamespaceRoot?: boolean,
 ): string => {
   if (u.name && !isNamespaceRoot && u.namespace?.unions.has(u.name))
     return u.name;
   return Array.from(u.variants)
-    .map((v) => resolveType(context, v[1].type, nestlevel, currentNamespace))
+    .map((v) => resolveType(v[1].type, nestlevel, currentNamespace, context))
     .join(" | ");
 };
 export const resolveScalar = (s: Scalar): string => {
@@ -170,10 +170,10 @@ export const resolveScalar = (s: Scalar): string => {
 };
 
 export const resolveModel = (
-  context: EmitContext,
   m: Model,
   nestlevel: number = 0,
   currentNamespace: Namespace,
+  context?: EmitContext,
   isNamespaceRoot?: boolean,
 ): string => {
   if (m.name && !isNamespaceRoot && currentNamespace.namespace === m.namespace)
@@ -181,9 +181,11 @@ export const resolveModel = (
   let ret = "{\n";
   let i = 1;
   m.properties.forEach((p) => {
-    const doc = getDoc(context.program, p);
-    if (doc) ret = ret.addLine(`/** ${doc} */`, nestlevel + 1);
-    const typeStr = resolveType(context, p.type, nestlevel, currentNamespace);
+    if (context) {
+      const doc = getDoc(context.program, p);
+      if (doc) ret = ret.addLine(`/** ${doc} */`, nestlevel + 1);
+    }
+    const typeStr = resolveType(p.type, nestlevel, currentNamespace, context);
     if (typeStr.includes("unknown"))
       console.warn(`Could not resolve property ${p.name} on ${m.name}`);
     ret = ret.addLine(

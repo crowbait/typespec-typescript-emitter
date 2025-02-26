@@ -4,6 +4,7 @@ import {
   navigateProgram,
   resolvePath,
 } from "@typespec/compiler";
+import { emitRoutedTypemap } from "./emit_mapped_types.js";
 import { emitRoutes } from "./emit_routes.js";
 import emitTypes from "./emit_types.js";
 import autogenerateWarning from "./helper_autogenerateWarning.js";
@@ -42,6 +43,7 @@ export async function $onEmit(context: EmitContext) {
 
     let targetNamespaceFound = false;
     let routesObject = "";
+    let routedTypemap = "";
     let typeFiles: ReturnType<typeof emitTypes> = {
       files: {},
       typeguardedNames: [],
@@ -56,7 +58,10 @@ export async function $onEmit(context: EmitContext) {
           if (options["enable-types"] || options["enable-typeguards"])
             typeFiles = emitTypes(context, n, options);
           if (options["enable-routes"]) {
-            routesObject = emitRoutes(options, context, n);
+            routesObject = emitRoutes(context, n);
+          }
+          if (options["enable-routed-typemap"]) {
+            routedTypemap = emitRoutedTypemap(context, n);
           }
         }
       },
@@ -74,6 +79,18 @@ export async function $onEmit(context: EmitContext) {
           `routes_${options["root-namespace"]}.ts`,
         ),
         content: `/* eslint-disable */\n\n${autogenerateWarning}${routesObject}`,
+      });
+    }
+
+    // routed typemap
+    if (options["enable-routed-typemap"]) {
+      if (!routedTypemap) throw new Error("Routed typemap empty.");
+      await emitFile(context.program, {
+        path: resolvePath(
+          options["out-dir"],
+          `routedTypemap_${options["root-namespace"]}.ts`,
+        ),
+        content: `/* eslint-disable */\n\n${autogenerateWarning}${routedTypemap}`,
       });
     }
 

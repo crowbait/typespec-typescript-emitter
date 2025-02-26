@@ -1,9 +1,7 @@
 import { EmitContext, getDoc, Namespace } from "@typespec/compiler";
 import { getAuthentication, getHttpOperation } from "@typespec/http";
-import { EmitterOptions } from "./lib.js";
 
 export const emitRoutes = (
-  options: EmitterOptions,
   context: EmitContext,
   namespace: Namespace,
 ): string => {
