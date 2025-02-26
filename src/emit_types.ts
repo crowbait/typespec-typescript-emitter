@@ -5,7 +5,6 @@ import {
   resolveUnion,
 } from "./emit_types_resolve.js";
 import { getTypeguardModel } from "./emit_types_typeguards.js";
-import autogenerateWarning from "./helper_autogenerateWarning.js";
 import { EmitterOptions } from "./lib.js";
 
 const emitTypes = (
@@ -69,8 +68,6 @@ const emitTypes = (
       }
       file += "\n";
     });
-
-    if (file) file = autogenerateWarning + file;
     // set output for this namespace
     out.files[n.name.charAt(0).toUpperCase() + n.name.slice(1)] = file;
     // recursively iterate child namespaces

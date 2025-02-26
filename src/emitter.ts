@@ -4,17 +4,17 @@ import {
   navigateProgram,
   resolvePath,
 } from "@typespec/compiler";
-import { getServers } from "@typespec/http";
-import emitRoutes from "./emit_routes.js";
+import { emitRoutes } from "./emit_routes.js";
 import emitTypes from "./emit_types.js";
+import autogenerateWarning from "./helper_autogenerateWarning.js";
 import { EmitterOptions } from "./lib.js";
 
+// helper to add lines to string with indentation
 declare global {
   interface String {
     addLine(str: string, tabs?: number, continued?: boolean): string;
   }
 }
-
 String.prototype.addLine = function (
   this: string,
   str: string,
@@ -34,14 +34,8 @@ export async function $onEmit(context: EmitContext) {
         (context.options["enable-types"] ?? true) &&
         (context.options["enable-typeguards"] ?? false),
       "enable-routes": context.options["enable-routes"] ?? false,
-      "typeguards-in-routes":
-        (context.options["enable-types"] ?? true) &&
-        (context.options["enable-typeguards"] ?? false) &&
-        (context.options["enable-routes"] ?? false) &&
-        (context.options["typeguards-in-routes"] ?? false),
-      "relative-routes":
-        (context.options["enable-routes"] ?? false) &&
-        (context.options["relative-routes"] ?? false),
+      "enable-routed-typemap":
+        context.options["enable-routed-typemap"] ?? false,
     };
 
     console.log(`Writing routes to ${options["out-dir"]}`);
@@ -62,14 +56,7 @@ export async function $onEmit(context: EmitContext) {
           if (options["enable-types"] || options["enable-typeguards"])
             typeFiles = emitTypes(context, n, options);
           if (options["enable-routes"]) {
-            const servers = getServers(context.program, n);
-            routesObject = emitRoutes(
-              context,
-              n,
-              servers && servers[0] ? servers[0].url : "",
-              options,
-              typeFiles.typeguardedNames,
-            );
+            routesObject = emitRoutes(options, context, n);
           }
         }
       },
@@ -86,7 +73,7 @@ export async function $onEmit(context: EmitContext) {
           options["out-dir"],
           `routes_${options["root-namespace"]}.ts`,
         ),
-        content: `/* eslint-disable */\n${routesObject}`,
+        content: `/* eslint-disable */\n\n${autogenerateWarning}${routesObject}`,
       });
     }
 
@@ -97,7 +84,7 @@ export async function $onEmit(context: EmitContext) {
         if (typeFileArr[i][1])
           await emitFile(context.program, {
             path: resolvePath(options["out-dir"], `${typeFileArr[i][0]}.ts`),
-            content: `/* eslint-disable */\n${typeFileArr[i][1]}`,
+            content: `/* eslint-disable */\n\n${autogenerateWarning}${typeFileArr[i][1]}`,
           });
       }
     }

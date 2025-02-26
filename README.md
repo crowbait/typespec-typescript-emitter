@@ -45,8 +45,6 @@ options:
     enable-types: true
     enable-typeguards: false
     enable-routes: false
-    relative-routes: false
-    typeguards-in-routes: true
 ```
 
 The following options are available:
@@ -56,8 +54,6 @@ The following options are available:
 - `enable-types` (default: true): enables output of TypeScript types.
 - `enable-typeguards` (default: false): enables output of typeguards, *IF* type-output is enabled.
 - `enable-routes` (default: false): enables output of the HTTP-routes object.
-- `relative-routes` (default: false): emits URLs in the routes object relative to the server's address (as opposed to a fully qualified URL when set to false).
-- `typeguards-in-routes` (default: false) **Experimental**: generates or references typeguards in the routes object, *IF* types, typeguards *and* routes are enabled.
 
 ## Types emitter
 
@@ -154,7 +150,12 @@ model Derived2 {...OmitProperties<Demo, "prop1">};
 **This emitter depends on your use of the `TypeSpec.Http` library**.
 
 If you're using `TypeSpec.Http` to define your API routes and endpoints, this library offers an emitter to export a `routes` object.
-The way this is implemented, it will currently only work well for 'simpler' projects using one root domain.
+It will generate a nested object containing information about every `op` you have defined, nested by namespace.
+I contains the following data (per `op`):
+- `method`: HTTP method
+- `path`: Path (as defined as `route`-string; parameters are not substituted)
+- `getUrl`: Function for generating a valid URL to this `op`; if the path has parameters, this function will have analogue parameters
+- `auth`: Array of valid authentication schemes (or `[null]`, if none)
 Just as the types emitter, this emitter will also preserve docs as JSDoc-style comments.
 
 Example:
@@ -176,7 +177,7 @@ namespace myProject { // remember to set in config!
   namespace sub {
     @post
     @route("post/{post_param}")
-    @useAuth(BasicAuth)
+    @useAuth(BearerAuth)
     op postSomething(
       @path post_param: int32,
       @body body: string
@@ -191,29 +192,23 @@ namespace myProject { // remember to set in config!
 /* /path/to/outdir/routes_{root-namespace}.ts */
 export const routes_myProject = {
   getSomething: {
-    method: 'get',
-    getUrl: () => 'https://api.example.com/',
-    auth: false,
-    // with `typeguards-in-routes`
-    isRequestType: null,
-    isResponseType: (arg: any): boolean => typeof arg === 'string'
+    method: 'GET',
+    path: '/',
+    getUrl: (): string => `/`,
+    auth: [null]
   },
   getSmthElse: {
-    method: 'get',
-    getUrl: (p: {param: string}) => `https://api.example.com/${p.param}`,
-    auth: 'varies',
-    // with `typeguards-in-routes`
-    isRequestType: null,
-    isResponseType: (arg: any): boolean => typeof arg === 'string'
+    method: 'GET',
+    path: '/{param}',
+    getUrl: (params: {param: string}): string => `/${params.param}`,
+    auth: [null, "BASIC"]
   },
   sub: {
     postSomething: {
-      method: 'post',
-      getUrl: (p: {post_param: string}) => `https://api.example.com/subroute/post/${p.post_param}`,
-      auth: true,
-      // with `typeguards-in-routes`
-      isRequestType: (arg: any): boolean => typeof arg === 'string',
-      isResponseType: (arg: any): boolean => typeof arg === 'string'
+      method: 'POST',
+      path: '/post/{post_param}',
+      getUrl: (params: {post_param: string}): string => `/post/${params.post_param}`,
+      auth: ["BEARER"]
     }
   }
 } as const;
