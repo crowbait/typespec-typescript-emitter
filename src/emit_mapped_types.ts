@@ -85,7 +85,6 @@ export const emitRoutedTypemap = (
   };
 
   traverseNamespace(namespace);
-  console.log(ops);
   let out = `export type types_${context.options["root-namespace"]} = {\n`;
   out += Object.entries(ops)
     .map((op) => {
