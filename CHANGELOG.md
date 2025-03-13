@@ -1,3 +1,20 @@
+# [1.0.0](https://github.com/crowbait/typespec-typescript-emitter/compare/v0.4.1...v1.0.0) (2025-03-13)
+
+
+* feat!: complete rework of routes emitter ([2f07e7f](https://github.com/crowbait/typespec-typescript-emitter/commit/2f07e7f487f0e6531b89e66f7de4d7d09382e4e5))
+
+
+### Features
+
+* routed typemap ([0a57f43](https://github.com/crowbait/typespec-typescript-emitter/commit/0a57f439e6f483c35b00824c725aecc66d3a80df))
+
+
+### BREAKING CHANGES
+
+* This breaks existing configurations and - depending on how it was used - usage of the emitted routes object.
+
+
+
 ## [0.4.1](https://github.com/crowbait/typespec-typescript-emitter/compare/v0.4.0...v0.4.1) (2025-02-25)
 
 
@@ -33,15 +50,6 @@
 * model resolution if spread over multiple files ([bd34d4e](https://github.com/crowbait/typespec-typescript-emitter/commit/bd34d4ee7a7cc83c3c233ffd3ae9086db318be51))
 * model typeguard resolution if spread over mutliple files ([eab6064](https://github.com/crowbait/typespec-typescript-emitter/commit/eab606421c930d5c9a747ffbd0d1a0707608374b))
 * support recursive records ([c0bad3f](https://github.com/crowbait/typespec-typescript-emitter/commit/c0bad3f15f2f0913ef99129ce17c53a17fd0d125)), closes [#3](https://github.com/crowbait/typespec-typescript-emitter/issues/3)
-
-
-
-## [0.3.3](https://github.com/crowbait/typespec-typescript-emitter/compare/v0.3.2...v0.3.3) (2025-01-02)
-
-
-### Bug Fixes
-
-* parsing of Record-type models ([b6e1dd9](https://github.com/crowbait/typespec-typescript-emitter/commit/b6e1dd91b94e39ad657d584f49051bc8e9e83608)), closes [#2](https://github.com/crowbait/typespec-typescript-emitter/issues/2)
 
 
 
