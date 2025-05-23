@@ -1,4 +1,4 @@
-name: Create Release
+name: Create Release (without bumping version)
 on:
   workflow_dispatch:
 
