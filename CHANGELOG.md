@@ -1,3 +1,7 @@
+# [1.1.0](https://github.com/crowbait/typespec-typescript-emitter/compare/v1.0.0...v1.1.0) (2025-05-23)
+
+
+
 # [1.0.0](https://github.com/crowbait/typespec-typescript-emitter/compare/v0.4.1...v1.0.0) (2025-03-13)
 
 
@@ -39,17 +43,6 @@
 ### Bug Fixes
 
 * ci (no skip on chore-only) ([75b2e5d](https://github.com/crowbait/typespec-typescript-emitter/commit/75b2e5d4346fd17de5c7baf689de6e4cac259542))
-
-
-
-## [0.3.4](https://github.com/crowbait/typespec-typescript-emitter/compare/v0.3.3...v0.3.4) (2025-01-03)
-
-
-### Bug Fixes
-
-* model resolution if spread over multiple files ([bd34d4e](https://github.com/crowbait/typespec-typescript-emitter/commit/bd34d4ee7a7cc83c3c233ffd3ae9086db318be51))
-* model typeguard resolution if spread over mutliple files ([eab6064](https://github.com/crowbait/typespec-typescript-emitter/commit/eab606421c930d5c9a747ffbd0d1a0707608374b))
-* support recursive records ([c0bad3f](https://github.com/crowbait/typespec-typescript-emitter/commit/c0bad3f15f2f0913ef99129ce17c53a17fd0d125)), closes [#3](https://github.com/crowbait/typespec-typescript-emitter/issues/3)
 
 
 
