@@ -25,7 +25,7 @@ export const emitRoutedTypemap = (
       if (!ops[path]) ops[path] = {};
       ops[path][verb] = {
         request: "null",
-        response: [{ status: 200, body: "unknown" }],
+        response: [{ status: 200, body: "{}" }],
       };
 
       // request
@@ -50,7 +50,7 @@ export const emitRoutedTypemap = (
             // if the return type is a model, it may have a fully qualified body
             const modelret: (typeof ret)[number] = {
               status: 200,
-              body: "unknown",
+              body: "{}",
             };
             let wasQualifiedBody = false;
             t.properties.forEach((prop) => {
@@ -112,7 +112,7 @@ export const emitRoutedTypemap = (
           return verbret;
         })
         .join(",\n");
-      pathret += "}";
+      pathret += "\n  }";
       return pathret;
     })
     .join(",\n");

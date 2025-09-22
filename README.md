@@ -23,9 +23,10 @@ It can the following things:
 - [typespec-typescript-emitter](#typespec-typescript-emitter)
   - [Installation](#installation)
   - [Configuration](#configuration)
-  - [Types emitter](#types-emitter)
+  - [Types Emitter](#types-emitter)
     - [Alias's](#aliass)
-  - [Routes emitter](#routes-emitter)
+  - [Routes Emitter](#routes-emitter)
+  - [Routed Typemap](#routed-typemap)
 
 ## Installation
 
@@ -57,7 +58,7 @@ The following options are available:
 - `enable-typeguards` (default: false): enables output of typeguards, *IF* type-output is enabled.
 - `enable-routes` (default: false): enables output of the HTTP-routes object.
 
-## Types emitter
+## Types Emitter
 
 This emitter will traverse your configured root namespace and all nested namespaces, generating a `{namespace-name}.ts`-file.
 
@@ -147,7 +148,7 @@ alias Derived1 = OmitProperties<Demo, "prop1">;
 model Derived2 {...OmitProperties<Demo, "prop1">};
 ```
 
-## Routes emitter
+## Routes Emitter
 
 **This emitter depends on your use of the `TypeSpec.Http` library**.
 
@@ -216,3 +217,90 @@ export const routes_myProject = {
   }
 } as const;
 ```
+
+## Routed Typemap
+
+This emitter produces a Typemap (a typescript type indexed by string keys mapping other types) based on your HTTP routes and verbs.
+In short, this allows you to select a type *used in a body of your HTTP ops* using it's path and verb. This includes request and response bodies. Path parameters are not relevant for this emitter; those are already handled in the Routes object.
+This can be helpful when, for example, building a wrapper around your API.
+
+> [!NOTE]
+> The Typemap is not nested! This means that, let's say the route "/user/account" will not be mapped to `{user: {account: /* ... */}}` (somewhat similar to how the Routes Emitter works), but to `{"/user/account": /* ... */}`. Crucially, those map keys are *the same as the `path` property in the Routes object* emitted from the Routes Emitter.
+> This means you can select from the Typemap *using* the structured Routes object.
+
+Example:
+
+```ts
+@route("/typemap")
+namespace namespaceA.typemap {
+  model ModelA {
+    id: int32,
+    name: string
+  }
+
+  @get
+  op getAll(): {@body body: ModelA[]} | {@statusCode status: 418, @body body: "Me teapot"};
+
+  @post
+  op add(@body body: ModelA): OkResponse;
+
+  @post
+  @route("{id}")
+  op getOne(
+    @path id: int32
+  ): {@body body: ModelA}| NotFoundResponse | {@statusCode status: 418} | {@statusCode status: 419, @body body: {}};
+}
+```
+
+...will be transformed into:
+
+```ts
+/* /path/to/outdir/routedTypemap_{root-namespace}.ts */
+export type types_namespaceA = {
+  ['/typemap']: {
+    ['GET']: {
+      request: null
+      response: {status: 200, body: {
+        id: number,
+        name: string
+      }[]} | {status: 418, body: 'Me teapot'}
+    },
+    ['POST']: {
+      request: {
+        id: number,
+        name: string
+      }
+      response: {status: 200, body: {
+        /** The status code. */
+        statusCode: 200
+      }}
+    }
+  },
+  ['/typemap/{id}']: {
+    ['POST']: {
+      request: null
+      response: {status: 200, body: {
+        id: number,
+        name: string
+      }} | {status: 404, body: {
+        /** The status code. */
+        statusCode: 404
+      }} | {status: 418, body: {
+        status: 418
+      }} | {status: 419, body: {
+      }}
+    }
+  }
+};
+```
+
+> [!NOTE]
+> Observe how the emitter
+>
+> - assumes a `200` status code for an op's response type if you didn't define any (first responses on `getAll` and `getOne` ops)
+> - assumes the entire response type is the body of no body is explicitely decorated (418 on `getOne` op) (this is non-standard; I have seen quite a few projects not realizing the response definition should have a body *in* it and treating the whole thing as a body; so while technically "wrong", this accomodates those projects. You can easily define a truly empty body using `{}`, `""`, `null`..., see 419 on `getOne` op)
+
+Additional notes:
+
+- There is currently no built-in way of accessing typeguards from paths their types may be associated with.
+- Models are not reused in or imported by this emitter. Reasoning involves "no runtime overhead either way", "simpler code" and "you're not supposed to rummage around in the TS files anyway"; this has been touched upon in [#4](https://github.com/crowbait/typespec-typescript-emitter/issues/4#issuecomment-2720955282) and [#6](https://github.com/crowbait/typespec-typescript-emitter/issues/6#issuecomment-3049999155).
