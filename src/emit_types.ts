@@ -32,7 +32,13 @@ const emitTypes = (
     });
     n.unions.forEach((u) => {
       if (options["enable-types"]) {
-        const resolved = resolveUnion(u, 0, n, context, true);
+        const resolved = resolveUnion({
+          u,
+          nestlevel: 0,
+          currentNamespace: n,
+          context,
+          isNamespaceRoot: true,
+        });
         if (resolved) {
           const doc = getDoc(context.program, u);
           if (doc) file = file.addLine(`/** ${doc} */`);
@@ -42,13 +48,25 @@ const emitTypes = (
     });
     n.models.forEach((m) => {
       if (options["enable-types"]) {
-        const resolved = resolveModel(m, 0, n, context, true);
+        const resolved = resolveModel({
+          m,
+          nestlevel: 0,
+          currentNamespace: n,
+          context,
+          isNamespaceRoot: true,
+        });
         if (resolved) {
           const doc = getDoc(context.program, m);
           if (doc) file = file.addLine(`/** ${doc} */`);
           file = file.addLine(`export interface ${m.name} ${resolved};`);
         }
       }
+
+      // TODO   if ANY (however nested) property of the model has any visibility modifier, create all necessary
+      // TODO   sub-models using utility types
+      // TODO   this could be a new function (in a new file)
+      // TODO   REMEMBER to check if *any* property has visibility(!.Read) OR invisibile(.Read); if not: no extra model for Read
+
       if (options["enable-typeguards"]) {
         file = file.addLine(
           `export function is${m.name}(arg: any): arg is ${m.name} {`,

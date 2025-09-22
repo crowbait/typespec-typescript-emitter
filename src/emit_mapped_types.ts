@@ -5,7 +5,11 @@ import {
   Operation,
   Type,
 } from "@typespec/compiler";
-import { getHttpOperation } from "@typespec/http";
+import {
+  getHttpOperation,
+  resolveRequestVisibility,
+  Visibility,
+} from "@typespec/http";
 import { resolveType } from "./emit_types_resolve.js";
 
 export const emitRoutedTypemap = (
@@ -36,12 +40,13 @@ export const emitRoutedTypemap = (
 
       // request
       let request = "null";
-      if (op.parameters.properties.has("body")) {
+      if (httpOp[0].parameters.body) {
         request = resolveType(
-          op.parameters.properties.get("body")!.type,
+          httpOp[0].parameters.body.type,
           1,
           namespace,
           context,
+          resolveRequestVisibility(context.program, op, httpOp[0].verb),
         ).replaceAll("\n", "\n  ");
       }
       ops[path][verb].request = request;
@@ -74,6 +79,7 @@ export const emitRoutedTypemap = (
                     1,
                     namespace,
                     context,
+                    Visibility.Read,
                   ).replaceAll("\n", "\n  ");
                   wasQualifiedBody = true;
                 }
@@ -81,10 +87,13 @@ export const emitRoutedTypemap = (
             });
             // ... if not, we assume status 200 and treat the model as the body
             if (!wasQualifiedBody) {
-              modelret.body = resolveType(t, 1, namespace, context).replaceAll(
-                "\n",
-                "\n  ",
-              );
+              modelret.body = resolveType(
+                t,
+                1,
+                namespace,
+                context,
+                Visibility.Read,
+              ).replaceAll("\n", "\n  ");
             }
             ret.push(modelret);
           } else if (t.kind === "Union") {
@@ -93,7 +102,11 @@ export const emitRoutedTypemap = (
             t.variants.forEach((variant) => {
               ret.push(...getReturnType(variant.type));
             });
-          } else ret.push({ status: 200, body: resolveType(t, 1, namespace) });
+          } else
+            ret.push({
+              status: 200,
+              body: resolveType(t, 1, namespace, context, Visibility.Read),
+            });
           return ret;
         };
         ops[path][verb].response = getReturnType(op.returnType);
