@@ -7,10 +7,12 @@ export const emitRoutedTypemap = (
   namespace: Namespace,
 ): string => {
   const ops: {
-    [K: string]: {
-      // "string" in these does not refer to the type "string"! It's the typescript code as string.
-      request: string;
-      response: Array<{ status: number | "unknown"; body: string }>;
+    [path: string]: {
+      [verb: string]: {
+        // "string" in these does not refer to the type "string"! It's the typescript code as string.
+        request: string;
+        response: Array<{ status: number | "unknown"; body: string }>;
+      };
     };
   } = {};
 
@@ -18,8 +20,10 @@ export const emitRoutedTypemap = (
     // operations
     n.operations.forEach((op) => {
       const httpOp = getHttpOperation(context.program, op);
-      const identifier = httpOp[0].path;
-      ops[identifier] = {
+      const path = httpOp[0].path;
+      const verb = httpOp[0].verb.toUpperCase();
+      if (!ops[path]) ops[path] = {};
+      ops[path][verb] = {
         request: "null",
         response: [{ status: 200, body: "unknown" }],
       };
@@ -32,14 +36,16 @@ export const emitRoutedTypemap = (
           1,
           namespace,
           context,
-        );
+        ).replaceAll("\n", "\n  ");
       }
-      ops[identifier].request = request;
+      ops[path][verb].request = request;
 
       // response
       if (op.returnType && op.returnType.kind) {
-        const getReturnType = (t: Type): (typeof ops)[string]["response"] => {
-          const ret: (typeof ops)[string]["response"] = [];
+        const getReturnType = (
+          t: Type,
+        ): (typeof ops)[string][string]["response"] => {
+          const ret: (typeof ops)[string][string]["response"] = [];
           if (t.kind === "Model") {
             // if the return type is a model, it may have a fully qualified body
             const modelret: (typeof ret)[number] = {
@@ -57,14 +63,22 @@ export const emitRoutedTypemap = (
                   modelret.status = prop.type.value;
                 // one of the properties may be the body definition
                 if (dec.definition?.name === "@body") {
-                  modelret.body = resolveType(prop.type, 1, namespace, context);
+                  modelret.body = resolveType(
+                    prop.type,
+                    1,
+                    namespace,
+                    context,
+                  ).replaceAll("\n", "\n  ");
                   wasQualifiedBody = true;
                 }
               });
             });
             // ... if not, we assume status 200 and treat the model as the body
             if (!wasQualifiedBody) {
-              modelret.body = resolveType(t, 1, namespace, context);
+              modelret.body = resolveType(t, 1, namespace, context).replaceAll(
+                "\n",
+                "\n  ",
+              );
             }
             ret.push(modelret);
           } else if (t.kind === "Union") {
@@ -76,7 +90,7 @@ export const emitRoutedTypemap = (
           } else ret.push({ status: 200, body: resolveType(t, 1, namespace) });
           return ret;
         };
-        ops[identifier].response = getReturnType(op.returnType);
+        ops[path][verb].response = getReturnType(op.returnType);
       }
     }); // end operations
 
@@ -87,12 +101,19 @@ export const emitRoutedTypemap = (
   traverseNamespace(namespace);
   let out = `export type types_${context.options["root-namespace"]} = {\n`;
   out += Object.entries(ops)
-    .map((op) => {
-      let ret = `  ['${op[0]}']: {\n`;
-      ret += `    request: ${op[1].request}\n`;
-      ret += `    response: ${op[1].response.map((res) => `{status: ${res.status}, body: ${res.body}}`).join(" | ")}\n`;
-      ret += "  }";
-      return ret;
+    .map((path) => {
+      let pathret = `  ['${path[0]}']: {\n`;
+      pathret += Object.entries(path[1])
+        .map((verb) => {
+          let verbret = `    ['${verb[0]}']: {\n`;
+          verbret += `      request: ${verb[1].request}\n`;
+          verbret += `      response: ${verb[1].response.map((res) => `{status: ${res.status}, body: ${res.body}}`).join(" | ")}\n`;
+          verbret += "    }";
+          return verbret;
+        })
+        .join(",\n");
+      pathret += "}";
+      return pathret;
     })
     .join(",\n");
   out += "\n};\n";

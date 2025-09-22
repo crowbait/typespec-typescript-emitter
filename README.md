@@ -4,7 +4,7 @@ This is a [TypeSpec](https://typespec.io) library aiming to provide
 TypeScript output to a TypeSpec project.
 
 Currently, this library is tailored to my specific use case, which is defining
-an HTTP API. The 'routes'-emitter will only work on HTTP operations. **However**, exporting all models as types is independent of HTTP, and so may also benefit projects with a different usage scenario.
+HTTP APIs. The 'routes'-emitter will only work on HTTP operations. **However**, exporting all models as types is independent of HTTP, and so may also benefit projects with a different usage scenario.
 
 It can the following things:
 
@@ -16,14 +16,16 @@ It can the following things:
   - referenced or generated in the routes object as well, if enabled (experimental)
 - for `TypeSpec.Http`: ts file containing a nested object containing information about every route
   - this can be imported at runtime to provide a robust way of eg. accessing URLs
+- for `TypeSpec.Http`: "routed typemap" mapping types to their routes (path and verb)
 
 ## Content <!-- omit from toc -->
 
-- [Installation](#installation)
-- [Configuration](#configuration)
-- [Types emitter](#types-emitter)
-  - [Alias's](#aliass)
-- [Routes emitter](#routes-emitter)
+- [typespec-typescript-emitter](#typespec-typescript-emitter)
+  - [Installation](#installation)
+  - [Configuration](#configuration)
+  - [Types emitter](#types-emitter)
+    - [Alias's](#aliass)
+  - [Routes emitter](#routes-emitter)
 
 ## Installation
 
@@ -59,7 +61,7 @@ The following options are available:
 
 This emitter will traverse your configured root namespace and all nested namespaces, generating a `{namespace-name}.ts`-file.
 
-The emitter can handle `Model`s, `Enum`s and `Union`s. ~~`Alias`'s~~ are _not_ emitted - more on that [later](#aliass). It will also preserve docs as JSDoc-style comments.
+The emitter can handle `Model`s, `Enum`s and `Union`s. ~~`Alias`'s~~ are *not* emitted - more on that [later](#aliass). It will also preserve docs as JSDoc-style comments.
 
 The emitter should be able to handle most basic TS contructs, like scalars, literals, object, arrays, tuples and intrinsics (eg. `null`).
 
@@ -152,6 +154,7 @@ model Derived2 {...OmitProperties<Demo, "prop1">};
 If you're using `TypeSpec.Http` to define your API routes and endpoints, this library offers an emitter to export a `routes` object.
 It will generate a nested object containing information about every `op` you have defined, nested by namespace.
 I contains the following data (per `op`):
+
 - `method`: HTTP method
 - `path`: Path (as defined as `route`-string; parameters are not substituted)
 - `getUrl`: Function for generating a valid URL to this `op`; if the path has parameters, this function will have analogue parameters
