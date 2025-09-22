@@ -1,4 +1,10 @@
-import { EmitContext, getDoc, Namespace } from "@typespec/compiler";
+import {
+  EmitContext,
+  getDoc,
+  isTemplateDeclaration,
+  Namespace,
+  Operation,
+} from "@typespec/compiler";
 import { getAuthentication, getHttpOperation } from "@typespec/http";
 
 export const emitRoutes = (
@@ -9,9 +15,7 @@ export const emitRoutes = (
 
   const traverseNamespace = (n: Namespace, nestLevel: number): void => {
     // operations
-    let opnum = 0;
-    n.operations.forEach((op) => {
-      opnum++;
+    const processOp = (op: Operation) => {
       const httpOp = getHttpOperation(context.program, op);
 
       // jsdoc comment
@@ -90,11 +94,13 @@ export const emitRoutes = (
       );
 
       // finalize route entry
-      out = out.addLine(
-        `}${opnum < n.operations.size || n.namespaces.size > 0 ? "," : ""}`,
-        nestLevel + 1,
-      );
-    }); // end operations
+      out = out.addLine("},", nestLevel + 1);
+    }; // end operations
+
+    n.operations.forEach(processOp);
+    n.interfaces.forEach((itf) => {
+      if (!isTemplateDeclaration(itf)) itf.operations.forEach(processOp);
+    });
 
     // get and traverse all namespaces
     let nsnum = 0;

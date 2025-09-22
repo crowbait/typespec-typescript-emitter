@@ -24,7 +24,7 @@ It can the following things:
   - [Installation](#installation)
   - [Configuration](#configuration)
   - [Types Emitter](#types-emitter)
-    - [Alias's](#aliass)
+    - [Aliases](#aliases)
   - [Routes Emitter](#routes-emitter)
   - [Routed Typemap](#routed-typemap)
 
@@ -62,7 +62,7 @@ The following options are available:
 
 This emitter will traverse your configured root namespace and all nested namespaces, generating a `{namespace-name}.ts`-file.
 
-The emitter can handle `Model`s, `Enum`s and `Union`s. ~~`Alias`'s~~ are *not* emitted - more on that [later](#aliass). It will also preserve docs as JSDoc-style comments.
+The emitter can handle `Model`s, `Enum`s and `Union`s. ~~`Alias`'s~~ are *not* emitted - more on that [later](#aliases). It will also preserve docs as JSDoc-style comments.
 
 The emitter should be able to handle most basic TS contructs, like scalars, literals, object, arrays, tuples and intrinsics (eg. `null`).
 
@@ -129,9 +129,9 @@ export function isBook(arg: any): arg is Book {
 Typeguards *should* create comprehensive checks that adhere as strictly to the source model as possible.
 If you find a case where the typeguard is looser than it needs to be, please report that as a bug.
 
-### Alias's
+### Aliases
 
-There seems to be no way to extract aliases from TypeSpec's emitter framework. Because of that, `Alias`'s are ignored by the emitter (or, to be more precise: `Alias`'s reach the emitter already resolved. They won't be exported as their own type but directly substituted where they're needed).
+There seems to be no way to extract aliases from TypeSpec's emitter framework. Because of that, `Alias`es are ignored by the emitter (or, to be more precise: `Alias`es reach the emitter already resolved. They won't be exported as their own type but directly substituted where they're needed).
 
 That means, if you want something to be emitted, it can't be an alias:
 

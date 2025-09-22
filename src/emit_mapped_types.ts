@@ -1,4 +1,10 @@
-import { EmitContext, Namespace, Type } from "@typespec/compiler";
+import {
+  EmitContext,
+  isTemplateDeclaration,
+  Namespace,
+  Operation,
+  Type,
+} from "@typespec/compiler";
 import { getHttpOperation } from "@typespec/http";
 import { resolveType } from "./emit_types_resolve.js";
 
@@ -18,7 +24,7 @@ export const emitRoutedTypemap = (
 
   const traverseNamespace = (n: Namespace): void => {
     // operations
-    n.operations.forEach((op) => {
+    const processOp = (op: Operation) => {
       const httpOp = getHttpOperation(context.program, op);
       const path = httpOp[0].path;
       const verb = httpOp[0].verb.toUpperCase();
@@ -92,7 +98,12 @@ export const emitRoutedTypemap = (
         };
         ops[path][verb].response = getReturnType(op.returnType);
       }
-    }); // end operations
+    }; // end operations
+
+    n.operations.forEach(processOp);
+    n.interfaces.forEach((itf) => {
+      if (!isTemplateDeclaration(itf)) itf.operations.forEach(processOp);
+    });
 
     // get and traverse all namespaces
     n.namespaces.forEach((ns) => traverseNamespace(ns));
