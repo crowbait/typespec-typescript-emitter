@@ -13,79 +13,79 @@ import {
 } from "@typespec/compiler";
 import { isVisible, Visibility } from "@typespec/http";
 
-export const resolveType = (
-  t: Type,
-  nestlevel: number,
-  currentNamespace: Namespace,
-  context: EmitContext,
-  visibility?: Visibility,
-): string => {
+export const resolveType = (args: {
+  t: Type;
+  nestlevel: number;
+  currentNamespace: Namespace;
+  context: EmitContext;
+  visibility?: Visibility;
+}): string => {
   let typeStr = "unknown";
-  switch (t.kind) {
+  switch (args.t.kind) {
     case "Model":
-      if (t.name === "Array") {
+      if (args.t.name === "Array") {
         typeStr = resolveArray(
-          t as ArrayModelType,
-          nestlevel,
-          currentNamespace,
-          context,
-          visibility,
+          args.t as ArrayModelType,
+          args.nestlevel,
+          args.currentNamespace,
+          args.context,
+          args.visibility,
         );
-      } else if (t.name === "Record") {
+      } else if (args.t.name === "Record") {
         typeStr = resolveRecord(
-          t as RecordModelType,
-          nestlevel,
-          currentNamespace,
-          context,
-          visibility,
+          args.t as RecordModelType,
+          args.nestlevel,
+          args.currentNamespace,
+          args.context,
+          args.visibility,
         );
       } else
         typeStr = resolveModel({
-          m: t,
-          nestlevel: nestlevel + 1,
-          currentNamespace,
-          context,
-          visibility: visibility,
+          m: args.t,
+          nestlevel: args.nestlevel + 1,
+          currentNamespace: args.currentNamespace,
+          context: args.context,
+          visibility: args.visibility,
         });
       break;
     case "Boolean":
       typeStr = "boolean";
       break;
     case "Enum":
-      typeStr = resolveEnum(t, nestlevel);
+      typeStr = resolveEnum(args.t, args.nestlevel);
       break;
     case "Intrinsic":
-      typeStr = t.name;
+      typeStr = args.t.name;
       break;
     case "Number":
-      typeStr = t.valueAsString;
+      typeStr = args.t.valueAsString;
       break;
     case "Scalar":
-      typeStr = resolveScalar(t);
+      typeStr = resolveScalar(args.t);
       break;
     case "String":
-      typeStr = `'${t.value}'`;
+      typeStr = `'${args.t.value}'`;
       break;
     case "Tuple":
       typeStr = resolveTuple(
-        t,
-        nestlevel,
-        currentNamespace,
-        context,
-        visibility,
+        args.t,
+        args.nestlevel,
+        args.currentNamespace,
+        args.context,
+        args.visibility,
       );
       break;
     case "Union":
       typeStr = resolveUnion({
-        u: t,
-        nestlevel,
-        currentNamespace,
-        context,
-        visibility,
+        u: args.t,
+        nestlevel: args.nestlevel,
+        currentNamespace: args.currentNamespace,
+        context: args.context,
+        visibility: args.visibility,
       });
       break;
     default:
-      console.warn("Could not resolve type:", t.kind);
+      console.warn("Could not resolve type:", args.t.kind);
   }
   return typeStr;
 };
@@ -99,7 +99,7 @@ export const resolveArray = (
 ): string => {
   if (a.name !== "Array")
     throw new Error(`Trying to parse model ${a.name} as Array`);
-  return `${resolveType(a.indexer.value, nestlevel, currentNamespace, context, visibility)}[]`;
+  return `${resolveType({ t: a.indexer.value, nestlevel, currentNamespace, context, visibility })}[]`;
 };
 
 export const resolveRecord = (
@@ -111,7 +111,7 @@ export const resolveRecord = (
 ): string => {
   if (a.name !== "Record")
     throw new Error(`Trying to parse model ${a.name} as Record`);
-  return `{[k: string]: ${resolveType(a.indexer.value, nestlevel, currentNamespace, context, visibility)}}`;
+  return `{[k: string]: ${resolveType({ t: a.indexer.value, nestlevel, currentNamespace, context, visibility })}}`;
 };
 
 export const resolveEnum = (
@@ -146,7 +146,7 @@ export const resolveTuple = (
   context: EmitContext,
   visibility?: Visibility,
 ): string => {
-  return `[${t.values.map((v) => resolveType(v, nestlevel, currentNamespace, context, visibility)).join(", ")}]`;
+  return `[${t.values.map((v) => resolveType({ t: v, nestlevel, currentNamespace, context, visibility })).join(", ")}]`;
 };
 
 export const resolveUnion = (args: {
@@ -165,13 +165,13 @@ export const resolveUnion = (args: {
     return args.u.name;
   return Array.from(args.u.variants)
     .map((v) =>
-      resolveType(
-        v[1].type,
-        args.nestlevel,
-        args.currentNamespace,
-        args.context,
-        args.visibility,
-      ),
+      resolveType({
+        t: v[1].type,
+        nestlevel: args.nestlevel,
+        currentNamespace: args.currentNamespace,
+        context: args.context,
+        visibility: args.visibility,
+      }),
     )
     .join(" | ");
 };
@@ -232,13 +232,13 @@ export const resolveModel = (args: {
         const doc = getDoc(args.context.program, p);
         if (doc) ret = ret.addLine(`/** ${doc} */`, args.nestlevel! + 1);
       }
-      const typeStr = resolveType(
-        p.type,
-        args.nestlevel,
-        args.currentNamespace,
-        args.context,
-        args.visibility,
-      );
+      const typeStr = resolveType({
+        t: p.type,
+        nestlevel: args.nestlevel,
+        currentNamespace: args.currentNamespace,
+        context: args.context,
+        visibility: args.visibility,
+      });
       if (typeStr.includes("unknown"))
         console.warn(`Could not resolve property ${p.name} on ${args.m.name}`);
       ret = ret.addLine(

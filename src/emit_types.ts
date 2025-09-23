@@ -62,11 +62,6 @@ const emitTypes = (
         }
       }
 
-      // TODO   if ANY (however nested) property of the model has any visibility modifier, create all necessary
-      // TODO   sub-models using utility types
-      // TODO   this could be a new function (in a new file)
-      // TODO   REMEMBER to check if *any* property has visibility(!.Read) OR invisibile(.Read); if not: no extra model for Read
-
       if (options["enable-typeguards"]) {
         file = file.addLine(
           `export function is${m.name}(arg: any): arg is ${m.name} {`,

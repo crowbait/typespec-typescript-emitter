@@ -41,13 +41,17 @@ export const emitRoutedTypemap = (
       // request
       let request = "null";
       if (httpOp[0].parameters.body) {
-        request = resolveType(
-          httpOp[0].parameters.body.type,
-          1,
-          namespace,
+        request = resolveType({
+          t: httpOp[0].parameters.body.type,
+          nestlevel: 1,
+          currentNamespace: namespace,
           context,
-          resolveRequestVisibility(context.program, op, httpOp[0].verb),
-        ).replaceAll("\n", "\n  ");
+          visibility: resolveRequestVisibility(
+            context.program,
+            op,
+            httpOp[0].verb,
+          ),
+        }).replaceAll("\n", "\n  ");
       }
       ops[path][verb].request = request;
 
@@ -74,26 +78,26 @@ export const emitRoutedTypemap = (
                   modelret.status = prop.type.value;
                 // one of the properties may be the body definition
                 if (dec.definition?.name === "@body") {
-                  modelret.body = resolveType(
-                    prop.type,
-                    1,
-                    namespace,
+                  modelret.body = resolveType({
+                    t: prop.type,
+                    nestlevel: 1,
+                    currentNamespace: namespace,
                     context,
-                    Visibility.Read,
-                  ).replaceAll("\n", "\n  ");
+                    visibility: Visibility.Read,
+                  }).replaceAll("\n", "\n  ");
                   wasQualifiedBody = true;
                 }
               });
             });
             // ... if not, we assume status 200 and treat the model as the body
             if (!wasQualifiedBody) {
-              modelret.body = resolveType(
+              modelret.body = resolveType({
                 t,
-                1,
-                namespace,
+                nestlevel: 1,
+                currentNamespace: namespace,
                 context,
-                Visibility.Read,
-              ).replaceAll("\n", "\n  ");
+                visibility: Visibility.Read,
+              }).replaceAll("\n", "\n  ");
             }
             ret.push(modelret);
           } else if (t.kind === "Union") {
@@ -105,7 +109,13 @@ export const emitRoutedTypemap = (
           } else
             ret.push({
               status: 200,
-              body: resolveType(t, 1, namespace, context, Visibility.Read),
+              body: resolveType({
+                t,
+                nestlevel: 1,
+                currentNamespace: namespace,
+                context,
+                visibility: Visibility.Read,
+              }),
             });
           return ret;
         };
