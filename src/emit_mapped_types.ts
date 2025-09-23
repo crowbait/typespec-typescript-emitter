@@ -41,9 +41,8 @@ export const emitRoutedTypemap = (
       // request
       let request = "null";
       if (httpOp[0].parameters.body) {
-        request = resolveType({
-          t: httpOp[0].parameters.body.type,
-          nestlevel: 1,
+        request = resolveType(httpOp[0].parameters.body.type, {
+          nestlevel: 2,
           currentNamespace: namespace,
           context,
           visibility: resolveRequestVisibility(
@@ -51,6 +50,7 @@ export const emitRoutedTypemap = (
             op,
             httpOp[0].verb,
           ),
+          resolveEvenWithName: true,
         }).replaceAll("\n", "\n  ");
       }
       ops[path][verb].request = request;
@@ -78,12 +78,12 @@ export const emitRoutedTypemap = (
                   modelret.status = prop.type.value;
                 // one of the properties may be the body definition
                 if (dec.definition?.name === "@body") {
-                  modelret.body = resolveType({
-                    t: prop.type,
-                    nestlevel: 1,
+                  modelret.body = resolveType(prop.type, {
+                    nestlevel: 2,
                     currentNamespace: namespace,
                     context,
                     visibility: Visibility.Read,
+                    resolveEvenWithName: true,
                   }).replaceAll("\n", "\n  ");
                   wasQualifiedBody = true;
                 }
@@ -91,12 +91,12 @@ export const emitRoutedTypemap = (
             });
             // ... if not, we assume status 200 and treat the model as the body
             if (!wasQualifiedBody) {
-              modelret.body = resolveType({
-                t,
-                nestlevel: 1,
+              modelret.body = resolveType(t, {
+                nestlevel: 2,
                 currentNamespace: namespace,
                 context,
                 visibility: Visibility.Read,
+                resolveEvenWithName: true,
               }).replaceAll("\n", "\n  ");
             }
             ret.push(modelret);
@@ -109,12 +109,12 @@ export const emitRoutedTypemap = (
           } else
             ret.push({
               status: 200,
-              body: resolveType({
-                t,
+              body: resolveType(t, {
                 nestlevel: 1,
                 currentNamespace: namespace,
                 context,
                 visibility: Visibility.Read,
+                resolveEvenWithName: true,
               }),
             });
           return ret;

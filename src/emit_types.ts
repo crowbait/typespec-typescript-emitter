@@ -22,7 +22,12 @@ const emitTypes = (
 
     n.enums.forEach((e) => {
       if (options["enable-types"]) {
-        const resolved = resolveEnum(e, 0, true);
+        const resolved = resolveEnum(e, {
+          context: context,
+          currentNamespace: n,
+          nestlevel: 0,
+          isNamespaceRoot: true,
+        });
         if (resolved) {
           const doc = getDoc(context.program, e);
           if (doc) file = file.addLine(`/** ${doc} */`);
@@ -32,11 +37,10 @@ const emitTypes = (
     });
     n.unions.forEach((u) => {
       if (options["enable-types"]) {
-        const resolved = resolveUnion({
-          u,
-          nestlevel: 0,
+        const resolved = resolveUnion(u, {
           currentNamespace: n,
           context,
+          nestlevel: 0,
           isNamespaceRoot: true,
         });
         if (resolved) {
@@ -48,8 +52,7 @@ const emitTypes = (
     });
     n.models.forEach((m) => {
       if (options["enable-types"]) {
-        const resolved = resolveModel({
-          m,
+        const resolved = resolveModel(m, {
           nestlevel: 0,
           currentNamespace: n,
           context,
