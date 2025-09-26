@@ -1,3 +1,15 @@
+## [1.1.1](https://github.com/crowbait/typespec-typescript-emitter/compare/v1.1.0...v1.1.1) (2025-09-26)
+
+
+### Bug Fixes
+
+* routed typemap respects visibility modifiers ([13c0a45](https://github.com/crowbait/typespec-typescript-emitter/commit/13c0a45f38b949a36ad2e8b6c40a1829ff3b54da))
+* routed-typemap handling of multiple verbs on same path ([f33e6d9](https://github.com/crowbait/typespec-typescript-emitter/commit/f33e6d94d78523206813ab4191feee29cb6c3b2e))
+* routes / routed typemap emitters now resolve ops inside interfaces ([21504bc](https://github.com/crowbait/typespec-typescript-emitter/commit/21504bc74cc4f77aeac1f1bcb4e52a42917d9146))
+* thorough resolution of nested types in typemap ([95af299](https://github.com/crowbait/typespec-typescript-emitter/commit/95af299b662dbcba0d21b56aa8ebe2f91c6e6e92))
+
+
+
 # [1.1.0](https://github.com/crowbait/typespec-typescript-emitter/compare/v1.0.0...v1.1.0) (2025-05-23)
 
 
@@ -34,15 +46,6 @@
 ### Features
 
 * option to emit relative URLs in routes object ([be50613](https://github.com/crowbait/typespec-typescript-emitter/commit/be50613ac94550899805faf2555b3f407d88be33))
-
-
-
-## [0.3.5](https://github.com/crowbait/typespec-typescript-emitter/compare/v0.3.4...v0.3.5) (2025-02-23)
-
-
-### Bug Fixes
-
-* ci (no skip on chore-only) ([75b2e5d](https://github.com/crowbait/typespec-typescript-emitter/commit/75b2e5d4346fd17de5c7baf689de6e4cac259542))
 
 
 
