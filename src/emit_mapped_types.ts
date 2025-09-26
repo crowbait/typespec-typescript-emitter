@@ -5,7 +5,11 @@ import {
   Operation,
   Type,
 } from "@typespec/compiler";
-import { getHttpOperation } from "@typespec/http";
+import {
+  getHttpOperation,
+  resolveRequestVisibility,
+  Visibility,
+} from "@typespec/http";
 import { resolveType } from "./emit_types_resolve.js";
 
 export const emitRoutedTypemap = (
@@ -36,13 +40,18 @@ export const emitRoutedTypemap = (
 
       // request
       let request = "null";
-      if (op.parameters.properties.has("body")) {
-        request = resolveType(
-          op.parameters.properties.get("body")!.type,
-          1,
-          namespace,
+      if (httpOp[0].parameters.body) {
+        request = resolveType(httpOp[0].parameters.body.type, {
+          nestlevel: 2,
+          currentNamespace: namespace,
           context,
-        ).replaceAll("\n", "\n  ");
+          visibility: resolveRequestVisibility(
+            context.program,
+            op,
+            httpOp[0].verb,
+          ),
+          resolveEvenWithName: true,
+        }).replaceAll("\n", "\n  ");
       }
       ops[path][verb].request = request;
 
@@ -69,22 +78,26 @@ export const emitRoutedTypemap = (
                   modelret.status = prop.type.value;
                 // one of the properties may be the body definition
                 if (dec.definition?.name === "@body") {
-                  modelret.body = resolveType(
-                    prop.type,
-                    1,
-                    namespace,
+                  modelret.body = resolveType(prop.type, {
+                    nestlevel: 2,
+                    currentNamespace: namespace,
                     context,
-                  ).replaceAll("\n", "\n  ");
+                    visibility: Visibility.Read,
+                    resolveEvenWithName: true,
+                  }).replaceAll("\n", "\n  ");
                   wasQualifiedBody = true;
                 }
               });
             });
             // ... if not, we assume status 200 and treat the model as the body
             if (!wasQualifiedBody) {
-              modelret.body = resolveType(t, 1, namespace, context).replaceAll(
-                "\n",
-                "\n  ",
-              );
+              modelret.body = resolveType(t, {
+                nestlevel: 2,
+                currentNamespace: namespace,
+                context,
+                visibility: Visibility.Read,
+                resolveEvenWithName: true,
+              }).replaceAll("\n", "\n  ");
             }
             ret.push(modelret);
           } else if (t.kind === "Union") {
@@ -93,7 +106,17 @@ export const emitRoutedTypemap = (
             t.variants.forEach((variant) => {
               ret.push(...getReturnType(variant.type));
             });
-          } else ret.push({ status: 200, body: resolveType(t, 1, namespace) });
+          } else
+            ret.push({
+              status: 200,
+              body: resolveType(t, {
+                nestlevel: 1,
+                currentNamespace: namespace,
+                context,
+                visibility: Visibility.Read,
+                resolveEvenWithName: true,
+              }),
+            });
           return ret;
         };
         ops[path][verb].response = getReturnType(op.returnType);

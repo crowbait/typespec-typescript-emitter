@@ -11,38 +11,32 @@ import {
   Type,
   Union,
 } from "@typespec/compiler";
+import { isVisible, Visibility } from "@typespec/http";
 
-export const resolveType = (
-  t: Type,
-  nestlevel: number,
-  currentNamespace: Namespace,
-  context?: EmitContext,
-): string => {
+type CommonOptions = {
+  nestlevel: number;
+  currentNamespace: Namespace;
+  context: EmitContext;
+  visibility?: Visibility;
+  resolveEvenWithName?: boolean;
+  isNamespaceRoot?: boolean;
+};
+
+export const resolveType = (t: Type, opts: CommonOptions): string => {
   let typeStr = "unknown";
   switch (t.kind) {
     case "Model":
       if (t.name === "Array") {
-        typeStr = resolveArray(
-          t as ArrayModelType,
-          nestlevel,
-          currentNamespace,
-          context,
-        );
+        typeStr = resolveArray(t as ArrayModelType, opts);
       } else if (t.name === "Record") {
-        typeStr = resolveRecord(
-          t as RecordModelType,
-          nestlevel,
-          currentNamespace,
-          context,
-        );
-      } else
-        typeStr = resolveModel(t, nestlevel + 1, currentNamespace, context);
+        typeStr = resolveRecord(t as RecordModelType, opts);
+      } else typeStr = resolveModel(t, opts);
       break;
     case "Boolean":
       typeStr = "boolean";
       break;
     case "Enum":
-      typeStr = resolveEnum(t, nestlevel);
+      typeStr = resolveEnum(t, opts);
       break;
     case "Intrinsic":
       typeStr = t.name;
@@ -57,10 +51,10 @@ export const resolveType = (
       typeStr = `'${t.value}'`;
       break;
     case "Tuple":
-      typeStr = resolveTuple(t, nestlevel, currentNamespace, context);
+      typeStr = resolveTuple(t, opts);
       break;
     case "Union":
-      typeStr = resolveUnion(t, nestlevel, currentNamespace, context);
+      typeStr = resolveUnion(t, opts);
       break;
     default:
       console.warn("Could not resolve type:", t.kind);
@@ -70,32 +64,29 @@ export const resolveType = (
 
 export const resolveArray = (
   a: ArrayModelType,
-  nestlevel: number,
-  currentNamespace: Namespace,
-  context?: EmitContext,
+  opts: CommonOptions,
 ): string => {
   if (a.name !== "Array")
     throw new Error(`Trying to parse model ${a.name} as Array`);
-  return `${resolveType(a.indexer.value, nestlevel, currentNamespace, context)}[]`;
+  return `(${resolveType(a.indexer.value, opts)})[]`;
 };
 
 export const resolveRecord = (
   a: RecordModelType,
-  nestlevel: number,
-  currentNamespace: Namespace,
-  context?: EmitContext,
+  opts: CommonOptions,
 ): string => {
   if (a.name !== "Record")
     throw new Error(`Trying to parse model ${a.name} as Record`);
-  return `{[k: string]: ${resolveType(a.indexer.value, nestlevel, currentNamespace, context)}}`;
+  return `{[k: string]: ${resolveType(a.indexer.value, opts)}}`;
 };
 
-export const resolveEnum = (
-  e: Enum,
-  nestlevel: number,
-  isNamespaceRoot?: boolean,
-): string => {
-  if (e.name && !isNamespaceRoot && e.namespace?.enums.has(e.name))
+export const resolveEnum = (e: Enum, opts: CommonOptions): string => {
+  if (
+    e.name &&
+    !opts.isNamespaceRoot &&
+    e.namespace?.enums.has(e.name) &&
+    !opts.resolveEvenWithName
+  )
     return e.name;
   let ret = "{\n";
   let i = 1;
@@ -107,34 +98,28 @@ export const resolveEnum = (
           (typeof p.value === "string" ? `'${p.value}'` : p.value.toString());
     ret = ret.addLine(
       `${p.name.includes("-") ? `'${p.name}'` : p.name}${val}${i < e.members.size ? "," : ""}`,
-      nestlevel + 1,
+      opts.nestlevel + 1,
     );
     i++;
   });
-  ret = ret.addLine("}", nestlevel, true);
+  ret = ret.addLine("}", opts.nestlevel, true);
   return ret;
 };
 
-export const resolveTuple = (
-  t: Tuple,
-  nestlevel: number,
-  currentNamespace: Namespace,
-  context?: EmitContext,
-): string => {
-  return `[${t.values.map((v) => resolveType(v, nestlevel, currentNamespace, context)).join(", ")}]`;
+export const resolveTuple = (t: Tuple, opts: CommonOptions): string => {
+  return `[${t.values.map((v) => resolveType(v, opts)).join(", ")}]`;
 };
 
-export const resolveUnion = (
-  u: Union,
-  nestlevel: number,
-  currentNamespace: Namespace,
-  context?: EmitContext,
-  isNamespaceRoot?: boolean,
-): string => {
-  if (u.name && !isNamespaceRoot && u.namespace?.unions.has(u.name))
+export const resolveUnion = (u: Union, opts: CommonOptions): string => {
+  if (
+    u.name &&
+    !opts.isNamespaceRoot &&
+    u.namespace?.unions.has(u.name) &&
+    !opts.resolveEvenWithName
+  )
     return u.name;
   return Array.from(u.variants)
-    .map((v) => resolveType(v[1].type, nestlevel, currentNamespace, context))
+    .map((v) => resolveType(v[1].type, opts))
     .join(" | ");
 };
 export const resolveScalar = (s: Scalar): string => {
@@ -169,31 +154,38 @@ export const resolveScalar = (s: Scalar): string => {
   return s.baseScalar ? resolveScalar(s.baseScalar) : ret;
 };
 
-export const resolveModel = (
-  m: Model,
-  nestlevel: number = 0,
-  currentNamespace: Namespace,
-  context?: EmitContext,
-  isNamespaceRoot?: boolean,
-): string => {
-  if (m.name && !isNamespaceRoot && currentNamespace.namespace === m.namespace)
+export const resolveModel = (m: Model, opts: CommonOptions): string => {
+  if (
+    m.name &&
+    !opts.isNamespaceRoot &&
+    opts.currentNamespace.namespace === m.namespace &&
+    !opts.resolveEvenWithName
+  )
     return m.name;
   let ret = "{\n";
   let i = 1;
   m.properties.forEach((p) => {
-    if (context) {
-      const doc = getDoc(context.program, p);
-      if (doc) ret = ret.addLine(`/** ${doc} */`, nestlevel + 1);
+    if (
+      opts.visibility === undefined ||
+      isVisible(opts.context.program, p, opts.visibility)
+    ) {
+      if (opts.context) {
+        const doc = getDoc(opts.context.program, p);
+        if (doc) ret = ret.addLine(`/** ${doc} */`, opts.nestlevel! + 1);
+      }
+      const typeStr = resolveType(p.type, {
+        ...opts,
+        nestlevel: opts.nestlevel + 1,
+      });
+      if (typeStr.includes("unknown"))
+        console.warn(`Could not resolve property ${p.name} on ${m.name}`);
+      ret = ret.addLine(
+        `${p.name}${p.optional ? "?" : ""}: ${typeStr}${i < m.properties.size ? "," : ""}`,
+        opts.nestlevel + 1,
+      );
     }
-    const typeStr = resolveType(p.type, nestlevel, currentNamespace, context);
-    if (typeStr.includes("unknown"))
-      console.warn(`Could not resolve property ${p.name} on ${m.name}`);
-    ret = ret.addLine(
-      `${p.name}${p.optional ? "?" : ""}: ${typeStr}${i < m.properties.size ? "," : ""}`,
-      nestlevel + 1,
-    );
     i++;
   });
-  ret = ret.addLine("}", nestlevel, true);
+  ret = ret.addLine("}", opts.nestlevel, true);
   return ret;
 };
