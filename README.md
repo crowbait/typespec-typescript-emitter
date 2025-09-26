@@ -65,6 +65,11 @@ The emitter can handle `Model`s, `Enum`s and `Union`s. ~~`Alias`'s~~ are *not* e
 
 The emitter should be able to handle most basic TS contructs, like scalars, literals, object, arrays, tuples and intrinsics (eg. `null`).
 
+> [!IMPORTANT]
+> These types do not respect most transformative decorators, notable `@visibility`.
+> This is because it's non-trivial to do, has unexpected problems and the functionality is *somewhat* already there, in the form of [Routed Typemaps](#routed-typemap).
+> For additional information, see [#7](https://github.com/crowbait/typespec-typescript-emitter/issues/7).
+
 Example:
 
 ```ts
@@ -247,7 +252,7 @@ namespace namespaceA.typemap {
   @route("{id}")
   op getOne(
     @path id: int32
-  ): {@body body: ModelA}| NotFoundResponse | {@statusCode status: 418} | {@statusCode status: 419, @body body: {}};
+  ): {@body body: ModelA}| NotFoundResponse | {@statusCode status: 418} | {@statusCode status: 419, @body body: null};
 }
 ```
 
@@ -286,11 +291,22 @@ export type types_namespaceA = {
         statusCode: 404
       }} | {status: 418, body: {
         status: 418
-      }} | {status: 419, body: {
-      }}
+      }} | {status: 419, body: null}
     }
   }
 };
+```
+
+...which can be accessed like this:
+
+```ts
+// Accessing type of response body directly by knowing path and verb
+type T_update1 = types_namespaceA['/typemap']['POST']['response']['body']
+
+// Accessing type of request body by indexing Routes object
+// namespace "namespaceA.typemap", op "add"
+type T_update2 = types_namespaceA[typeof routes_namespaceA.typemap.add.path]['POST']['request']
+// One could also use `typeof routes_namespace.testSimple.update.method` instead of 'POST'.
 ```
 
 > [!NOTE]
@@ -302,4 +318,4 @@ export type types_namespaceA = {
 Additional notes:
 
 - There is currently no built-in way of accessing typeguards from paths their types may be associated with.
-- Models are not reused in or imported by this emitter. Reasoning involves "no runtime overhead either way", "simpler code" and "you're not supposed to rummage around in the TS files anyway"; this has been touched upon in [#4](https://github.com/crowbait/typespec-typescript-emitter/issues/4#issuecomment-2720955282) and [#6](https://github.com/crowbait/typespec-typescript-emitter/issues/6#issuecomment-3049999155).
+- Models are not reused in or imported by this emitter. Reasoning involves "no runtime overhead either way", "simpler code", "self-contained emitter modules" and "you're not supposed to rummage around in the generated files anyway, just import them"; this has been touched upon in [#4](https://github.com/crowbait/typespec-typescript-emitter/issues/4#issuecomment-2720955282) and [#6](https://github.com/crowbait/typespec-typescript-emitter/issues/6#issuecomment-3049999155).
