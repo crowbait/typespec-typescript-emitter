@@ -56,6 +56,9 @@ export const resolveType = (t: Type, opts: CommonOptions): string => {
     case "Union":
       typeStr = resolveUnion(t, opts);
       break;
+    case "EnumMember":
+      typeStr = `${t.enum.name}.${t.name}`;
+      break;
     default:
       console.warn("Could not resolve type:", t.kind);
   }
