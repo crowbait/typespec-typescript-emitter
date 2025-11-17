@@ -9,6 +9,8 @@ export default tsEslint.config(
       "**/.temp/**/*",
       "**/*.md",
       "**/node_modules/**/*",
+      "**/test/out/**/*",
+      "**/test/targets/**/*",
     ],
   },
   eslint.configs.recommended,
