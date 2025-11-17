@@ -56,6 +56,17 @@ export const resolveType = (t: Type, opts: CommonOptions): string => {
     case "Union":
       typeStr = resolveUnion(t, opts);
       break;
+    case "EnumMember":
+      if (opts.resolveEvenWithName) {
+        // If we're at routed typemap we will just emit enum value
+        const value = resolveEnumMemberValue(t.enum, t.name);
+        if (value) {
+          typeStr = typeof value === "string" ? `'${value}'` : value.toString();
+        }
+        break;
+      }
+      typeStr = `${t.enum.name}.${t.name}`;
+      break;
     default:
       console.warn("Could not resolve type:", t.kind);
   }
@@ -68,7 +79,7 @@ export const resolveArray = (
 ): string => {
   if (a.name !== "Array")
     throw new Error(`Trying to parse model ${a.name} as Array`);
-  return `(${resolveType(a.indexer.value, opts)})[]`;
+  return `(${resolveType(a.indexer.value, { ...opts, isNamespaceRoot: false })})[]`;
 };
 
 export const resolveRecord = (
@@ -84,10 +95,16 @@ export const resolveEnum = (e: Enum, opts: CommonOptions): string => {
   if (
     e.name &&
     !opts.isNamespaceRoot &&
-    e.namespace?.enums.has(e.name) &&
+    opts.currentNamespace.enums.has(e.name) &&
     !opts.resolveEvenWithName
-  )
+  ) {
     return e.name;
+  }
+
+  if (opts.resolveEvenWithName) {
+    return resolveEnumAsUnion(e);
+  }
+
   let ret = "{\n";
   let i = 1;
   e.members.forEach((p) => {
@@ -119,7 +136,21 @@ export const resolveUnion = (u: Union, opts: CommonOptions): string => {
   )
     return u.name;
   return Array.from(u.variants)
-    .map((v) => resolveType(v[1].type, opts))
+    .map((v) => {
+      const variantType = v[1].type;
+      // If variant is a named model in the current namespace
+      // and it's not in routed typemap, reference it by name:
+      if (
+        !opts.resolveEvenWithName &&
+        variantType.kind === "Model" &&
+        variantType.name &&
+        opts.currentNamespace.models.has(variantType.name)
+      ) {
+        return variantType.name;
+      }
+      // Otherwise resolve type inline
+      return resolveType(variantType, { ...opts, isNamespaceRoot: false });
+    })
     .join(" | ");
 };
 export const resolveScalar = (s: Scalar): string => {
@@ -158,7 +189,7 @@ export const resolveModel = (m: Model, opts: CommonOptions): string => {
   if (
     m.name &&
     !opts.isNamespaceRoot &&
-    opts.currentNamespace.namespace === m.namespace &&
+    opts.currentNamespace.models.has(m.name) &&
     !opts.resolveEvenWithName
   )
     return m.name;
@@ -176,6 +207,7 @@ export const resolveModel = (m: Model, opts: CommonOptions): string => {
       const typeStr = resolveType(p.type, {
         ...opts,
         nestlevel: opts.nestlevel + 1,
+        isNamespaceRoot: false,
       });
       if (typeStr.includes("unknown"))
         console.warn(`Could not resolve property ${p.name} on ${m.name}`);
@@ -188,4 +220,25 @@ export const resolveModel = (m: Model, opts: CommonOptions): string => {
   });
   ret = ret.addLine("}", opts.nestlevel, true);
   return ret;
+};
+
+export const resolveEnumMemberValue = (
+  e: Enum,
+  name: string,
+): string | number | undefined => {
+  const member = e.members.get(name);
+  if (!member) {
+    console.warn("Missing enum member under name:", name);
+    return;
+  }
+  return member?.value;
+};
+
+export const resolveEnumAsUnion = (e: Enum): string => {
+  return Array.from(e.members.values())
+    .map((member, index) => {
+      const value = resolveEnumMemberValue(e, member.name) ?? index;
+      return typeof value === "string" ? `'${value}'` : value.toString();
+    })
+    .join(" | ");
 };
