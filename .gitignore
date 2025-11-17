@@ -7,3 +7,6 @@ dist/
 
 # Dependency directories
 node_modules/
+
+test/out/*
+!test/out/.gitkeep

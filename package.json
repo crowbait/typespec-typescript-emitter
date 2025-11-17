@@ -23,12 +23,16 @@
   },
   "devDependencies": {
     "@types/node": "latest",
+    "@typespec/compiler": "^1.6.0",
+    "@typespec/http": "^1.6.0",
+    "@typespec/openapi3": "^1.6.0",
     "eslint": "^9.15.0",
     "husky": "^9.1.6",
     "prettier": "^3.0.3",
     "rimraf": "^6.0.1",
     "typescript": "^5.3.3",
-    "typescript-eslint": "^8.15.0"
+    "typescript-eslint": "^8.15.0",
+    "vitest": "^4.0.10"
   },
   "peerDependencies": {
     "@typespec/compiler": "^1.0.0",
@@ -37,12 +41,12 @@
   "scripts": {
     "build": "rimraf dist && tsc",
     "watch": "tsc --watch",
-    "test": "npm run build && node --test",
     "lint": "eslint src/ test/ --report-unused-disable-directives --max-warnings=0",
     "lint:fix": "eslint . --report-unused-disable-directives --fix",
     "format": "prettier . --write",
     "format:check": "prettier --check .",
     "prepare": "husky",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "test": "vitest run"
   }
 }
