@@ -237,7 +237,7 @@ export const resolveEnumMemberValue = (
 export const resolveEnumAsUnion = (e: Enum): string => {
   return Array.from(e.members.values())
     .map((member) => {
-      const value = resolveEnumMemberValue(e, member.name) ?? "";
+      const value = resolveEnumMemberValue(e, member.name) ?? member.name;
       return typeof value === "string" ? `'${value}'` : value.toString();
     })
     .join(" | ");
