@@ -1,3 +1,7 @@
+## [1.1.2](https://github.com/crowbait/typespec-typescript-emitter/compare/v1.1.1...v1.1.2) (2025-11-17)
+
+
+
 ## [1.1.1](https://github.com/crowbait/typespec-typescript-emitter/compare/v1.1.0...v1.1.1) (2025-09-26)
 
 
@@ -37,15 +41,6 @@
 ### Bug Fixes
 
 * fixed eslint ignore directives ([9c0477a](https://github.com/crowbait/typespec-typescript-emitter/commit/9c0477a6925715b99c38d4133d04ee774a0a65f7))
-
-
-
-# [0.4.0](https://github.com/crowbait/typespec-typescript-emitter/compare/v0.3.5...v0.4.0) (2025-02-25)
-
-
-### Features
-
-* option to emit relative URLs in routes object ([be50613](https://github.com/crowbait/typespec-typescript-emitter/commit/be50613ac94550899805faf2555b3f407d88be33))
 
 
 
