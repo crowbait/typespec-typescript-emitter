@@ -57,6 +57,14 @@ export const resolveType = (t: Type, opts: CommonOptions): string => {
       typeStr = resolveUnion(t, opts);
       break;
     case "EnumMember":
+      if (opts.resolveEvenWithName) {
+        // If we're at routed typemap we will just emit enum value
+        const value = resolveEnumMemberValue(t.enum, t.name);
+        if (value) {
+          typeStr = typeof value === "string" ? `'${value}'` : value.toString();
+        }
+        break;
+      }
       typeStr = `${t.enum.name}.${t.name}`;
       break;
     default:
@@ -89,8 +97,14 @@ export const resolveEnum = (e: Enum, opts: CommonOptions): string => {
     !opts.isNamespaceRoot &&
     opts.currentNamespace.enums.has(e.name) &&
     !opts.resolveEvenWithName
-  )
+  ) {
     return e.name;
+  }
+
+  if (opts.resolveEvenWithName) {
+    return resolveEnumAsUnion(e);
+  }
+
   let ret = "{\n";
   let i = 1;
   e.members.forEach((p) => {
@@ -124,8 +138,10 @@ export const resolveUnion = (u: Union, opts: CommonOptions): string => {
   return Array.from(u.variants)
     .map((v) => {
       const variantType = v[1].type;
-      // If variant is a named model in the current namespace, reference it by name
+      // If variant is a named model in the current namespace
+      // and it's not in routed typemap, reference it by name:
       if (
+        !opts.resolveEvenWithName &&
         variantType.kind === "Model" &&
         variantType.name &&
         opts.currentNamespace.models.has(variantType.name)
@@ -204,4 +220,25 @@ export const resolveModel = (m: Model, opts: CommonOptions): string => {
   });
   ret = ret.addLine("}", opts.nestlevel, true);
   return ret;
+};
+
+export const resolveEnumMemberValue = (
+  e: Enum,
+  name: string,
+): string | number | undefined => {
+  const member = e.members.get(name);
+  if (!member) {
+    console.warn("Missing enum member under name:", name);
+    return;
+  }
+  return member?.value;
+};
+
+export const resolveEnumAsUnion = (e: Enum): string => {
+  return Array.from(e.members.values())
+    .map((member) => {
+      const value = resolveEnumMemberValue(e, member.name) ?? "";
+      return typeof value === "string" ? `'${value}'` : value.toString();
+    })
+    .join(" | ");
 };
