@@ -47,6 +47,7 @@ options:
     enable-routes: false
     enable-routed-typemap: false
     string-nominal-enums: false
+    serializable-date-types: false
 ```
 
 The following options are available:
@@ -58,6 +59,7 @@ The following options are available:
 - `enable-routes` (default: false): enables output of the HTTP-routes object.
 - `enable-routed-typemap` (default: false): enables output of an indexable type mapping paths and HTTP verbs to request and response bodies.
 - `string-nominal-enums` (default: false): outputs member names strings instead of index values for nominal enums members or nominal enum unions at routed typemaps.
+- `serializable-date-types` (default: false): outputs serializable types for typespec's dates types that match OpenApi spec. Types like `offsetDateTime`, `plainDate` and `utcDateTime` will be emitted as `string` and `unixTimestamp32` as `number`.
 
 ## Types Emitter
 

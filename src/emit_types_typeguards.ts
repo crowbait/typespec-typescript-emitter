@@ -6,6 +6,7 @@ export const getTypeguardModel = (
   accessor: string,
   nestingLevel = 1,
   currentNamespace: Namespace,
+  serializableDates: boolean,
   knownGuards?: Array<{ filename: string; name: string }>,
 ): [string, string[]] => {
   const imports: string[] = [];
@@ -17,6 +18,7 @@ export const getTypeguardModel = (
           `${accessor}['${property[1].name}']`,
           nestingLevel + 1,
           currentNamespace,
+          serializableDates,
           knownGuards,
         );
         imports.push(...guard[1]);
@@ -46,6 +48,7 @@ export const getTypeguard = (
   accessor: string,
   nestingLevel = 1,
   currentNamespace: Namespace,
+  serializableDates: boolean,
   knownGuards?: Array<{ filename: string; name: string }>,
 ): [string, string[]] => {
   switch (t.kind) {
@@ -56,6 +59,7 @@ export const getTypeguard = (
           "v",
           nestingLevel,
           currentNamespace,
+          serializableDates,
           knownGuards,
         );
         if (guard[0].endsWith("\n"))
@@ -70,6 +74,7 @@ export const getTypeguard = (
           "v",
           nestingLevel,
           currentNamespace,
+          serializableDates,
           knownGuards,
         );
         if (guard[0].endsWith("\n"))
@@ -97,6 +102,7 @@ export const getTypeguard = (
           accessor,
           nestingLevel,
           currentNamespace,
+          serializableDates,
           knownGuards,
         );
         return [
@@ -114,10 +120,13 @@ export const getTypeguard = (
       if (
         // TODO: figure out how to support all the varieties of dates
         // TODO: support byte arrays
-        resolveScalar(t) !== "Date" &&
-        resolveScalar(t) !== "Uint8Array"
+        resolveScalar(t, serializableDates) !== "Date" &&
+        resolveScalar(t, serializableDates) !== "Uint8Array"
       )
-        return [`typeof ${accessor} === '${resolveScalar(t)}'`, []];
+        return [
+          `typeof ${accessor} === '${resolveScalar(t, serializableDates)}'`,
+          [],
+        ];
       break;
     case "String":
       return [`typeof ${accessor} === 'string'`, []];
@@ -132,6 +141,7 @@ export const getTypeguard = (
               `${accessor}[${i}]`,
               nestingLevel,
               currentNamespace,
+              serializableDates,
               knownGuards,
             );
             imports.push(...guard[1]);
@@ -151,6 +161,7 @@ export const getTypeguard = (
               `${accessor}`,
               nestingLevel,
               currentNamespace,
+              serializableDates,
               knownGuards,
             );
             imports.push(...guard[1]);

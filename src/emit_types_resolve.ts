@@ -45,7 +45,10 @@ export const resolveType = (t: Type, opts: CommonOptions): string => {
       typeStr = t.valueAsString;
       break;
     case "Scalar":
-      typeStr = resolveScalar(t);
+      typeStr = resolveScalar(
+        t,
+        !!opts.context.options["serializable-date-types"],
+      );
       break;
     case "String":
       typeStr = `'${t.value}'`;
@@ -160,36 +163,46 @@ export const resolveUnion = (u: Union, opts: CommonOptions): string => {
     })
     .join(" | ");
 };
-export const resolveScalar = (s: Scalar): string => {
+export const resolveScalar = (
+  s: Scalar,
+  serializableDates: boolean,
+): string => {
   let ret = "unknown";
-  if (!s.baseScalar) {
-    switch (s.name) {
-      case "boolean":
-        ret = "boolean";
-        break;
-      case "bytes":
-        ret = "Uint8Array";
-        break;
-      case "duration":
-      case "numeric":
-        ret = "number";
-        break;
-      case "plainTime":
-      case "string":
-      case "url":
-        ret = "string";
-        break;
-      case "offsetDateTime":
-      case "plainDate":
-      case "unixTimestamp32":
-      case "utcDateTime":
-        ret = "Date";
-        break;
-      default:
-        console.warn("Could not resolve scalar:", s.name);
-    }
+  switch (s.name) {
+    case "boolean":
+      ret = "boolean";
+      break;
+    case "bytes":
+      ret = "Uint8Array";
+      break;
+    case "duration":
+    case "numeric":
+      ret = "number";
+      break;
+    case "plainTime":
+    case "string":
+    case "url":
+      ret = "string";
+      break;
+    case "offsetDateTime":
+    case "plainDate":
+    case "utcDateTime":
+      ret = serializableDates ? "string" : "Date";
+      break;
+    case "unixTimestamp32":
+      ret = serializableDates ? "number" : "Date";
+      break;
+    default:
+      console.warn("Could not resolve scalar:", s.name);
   }
-  return s.baseScalar ? resolveScalar(s.baseScalar) : ret;
+
+  if (serializableDates && s.name === "unixTimestamp32") {
+    // If we want to use serializable date types baseScalar should be skipped
+    // for unixTimestamp32 (since it is utcDateTime and would emit a string)
+    return ret;
+  }
+
+  return s.baseScalar ? resolveScalar(s.baseScalar, serializableDates) : ret;
 };
 
 export const resolveModel = (m: Model, opts: CommonOptions): string => {

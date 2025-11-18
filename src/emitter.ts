@@ -38,6 +38,8 @@ export async function $onEmit(context: EmitContext) {
       "enable-routed-typemap":
         context.options["enable-routed-typemap"] ?? false,
       "string-nominal-enums": context.options["string-nominal-enums"] ?? false,
+      "serializable-date-types":
+        context.options["serializable-date-types"] ?? false,
     };
 
     console.log(`Writing routes to ${options["out-dir"]}`);
