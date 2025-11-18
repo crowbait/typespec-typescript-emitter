@@ -58,10 +58,17 @@ export const resolveType = (t: Type, opts: CommonOptions): string => {
       break;
     case "EnumMember":
       if (opts.resolveEvenWithName) {
-        // If we're at routed typemap we will just emit enum value
+        // If we're at routed typemap we will emit enum either value or index / name (as string if configured)
         const value = resolveEnumMemberValue(t.enum, t.name);
         if (value) {
           typeStr = typeof value === "string" ? `'${value}'` : value.toString();
+        } else if (opts.context.options["string-nominal-enums"]) {
+          typeStr = `'${t.name}'`;
+        } else {
+          const index = resolveEnumMemberIndex(t.enum, t.name);
+          if (index !== undefined) {
+            typeStr = index.toString();
+          }
         }
         break;
       }
@@ -102,7 +109,7 @@ export const resolveEnum = (e: Enum, opts: CommonOptions): string => {
   }
 
   if (opts.resolveEvenWithName) {
-    return resolveEnumAsUnion(e);
+    return resolveEnumAsUnion(e, opts);
   }
 
   let ret = "{\n";
@@ -234,11 +241,27 @@ export const resolveEnumMemberValue = (
   return member?.value;
 };
 
-export const resolveEnumAsUnion = (e: Enum): string => {
+export const resolveEnumAsUnion = (e: Enum, opts: CommonOptions): string => {
   return Array.from(e.members.values())
     .map((member, index) => {
-      const value = resolveEnumMemberValue(e, member.name) ?? index;
+      const fallback = opts.context.options["string-nominal-enums"]
+        ? member.name
+        : index;
+      const value = resolveEnumMemberValue(e, member.name) ?? fallback;
       return typeof value === "string" ? `'${value}'` : value.toString();
     })
     .join(" | ");
+};
+
+export const resolveEnumMemberIndex = (
+  e: Enum,
+  name: string,
+): number | undefined => {
+  const index = Array.from(e.members.values()).findIndex((member) => {
+    return member.name === name;
+  });
+  if (index === -1) {
+    return;
+  }
+  return index;
 };

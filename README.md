@@ -46,6 +46,7 @@ options:
     enable-typeguards: false
     enable-routes: false
     enable-routed-typemap: false
+    string-nominal-enums: false
 ```
 
 The following options are available:
@@ -56,6 +57,7 @@ The following options are available:
 - `enable-typeguards` (default: false): enables output of typeguards, *IF* type-output is enabled.
 - `enable-routes` (default: false): enables output of the HTTP-routes object.
 - `enable-routed-typemap` (default: false): enables output of an indexable type mapping paths and HTTP verbs to request and response bodies.
+- `string-nominal-enums` (default: false): outputs member names strings instead of index values for nominal enums members or nominal enum unions at routed typemaps.
 
 ## Types Emitter
 
