@@ -45,7 +45,10 @@ export const resolveType = (t: Type, opts: CommonOptions): string => {
       typeStr = t.valueAsString;
       break;
     case "Scalar":
-      typeStr = resolveScalar(t);
+      typeStr = resolveScalar(
+        t,
+        !!opts.context.options["serializable-date-types"],
+      );
       break;
     case "String":
       typeStr = `'${t.value}'`;
@@ -58,10 +61,17 @@ export const resolveType = (t: Type, opts: CommonOptions): string => {
       break;
     case "EnumMember":
       if (opts.resolveEvenWithName) {
-        // If we're at routed typemap we will just emit enum value
+        // If we're at routed typemap we will emit enum either value or index / name (as string if configured)
         const value = resolveEnumMemberValue(t.enum, t.name);
         if (value) {
           typeStr = typeof value === "string" ? `'${value}'` : value.toString();
+        } else if (opts.context.options["string-nominal-enums"]) {
+          typeStr = `'${t.name}'`;
+        } else {
+          const index = resolveEnumMemberIndex(t.enum, t.name);
+          if (index !== undefined) {
+            typeStr = index.toString();
+          }
         }
         break;
       }
@@ -102,7 +112,7 @@ export const resolveEnum = (e: Enum, opts: CommonOptions): string => {
   }
 
   if (opts.resolveEvenWithName) {
-    return resolveEnumAsUnion(e);
+    return resolveEnumAsUnion(e, opts);
   }
 
   let ret = "{\n";
@@ -153,36 +163,46 @@ export const resolveUnion = (u: Union, opts: CommonOptions): string => {
     })
     .join(" | ");
 };
-export const resolveScalar = (s: Scalar): string => {
+export const resolveScalar = (
+  s: Scalar,
+  serializableDates: boolean,
+): string => {
   let ret = "unknown";
-  if (!s.baseScalar) {
-    switch (s.name) {
-      case "boolean":
-        ret = "boolean";
-        break;
-      case "bytes":
-        ret = "Uint8Array";
-        break;
-      case "duration":
-      case "numeric":
-        ret = "number";
-        break;
-      case "plainTime":
-      case "string":
-      case "url":
-        ret = "string";
-        break;
-      case "offsetDateTime":
-      case "plainDate":
-      case "unixTimestamp32":
-      case "utcDateTime":
-        ret = "Date";
-        break;
-      default:
-        console.warn("Could not resolve scalar:", s.name);
-    }
+  switch (s.name) {
+    case "boolean":
+      ret = "boolean";
+      break;
+    case "bytes":
+      ret = "Uint8Array";
+      break;
+    case "duration":
+    case "numeric":
+      ret = "number";
+      break;
+    case "plainTime":
+    case "string":
+    case "url":
+      ret = "string";
+      break;
+    case "offsetDateTime":
+    case "plainDate":
+    case "utcDateTime":
+      ret = serializableDates ? "string" : "Date";
+      break;
+    case "unixTimestamp32":
+      ret = serializableDates ? "number" : "Date";
+      break;
+    default:
+      console.warn("Could not resolve scalar:", s.name);
   }
-  return s.baseScalar ? resolveScalar(s.baseScalar) : ret;
+
+  if (serializableDates && s.name === "unixTimestamp32") {
+    // If we want to use serializable date types baseScalar should be skipped
+    // for unixTimestamp32 (since it is utcDateTime and would emit a string)
+    return ret;
+  }
+
+  return s.baseScalar ? resolveScalar(s.baseScalar, serializableDates) : ret;
 };
 
 export const resolveModel = (m: Model, opts: CommonOptions): string => {
@@ -234,11 +254,27 @@ export const resolveEnumMemberValue = (
   return member?.value;
 };
 
-export const resolveEnumAsUnion = (e: Enum): string => {
+export const resolveEnumAsUnion = (e: Enum, opts: CommonOptions): string => {
   return Array.from(e.members.values())
     .map((member, index) => {
-      const value = resolveEnumMemberValue(e, member.name) ?? index;
+      const fallback = opts.context.options["string-nominal-enums"]
+        ? member.name
+        : index;
+      const value = resolveEnumMemberValue(e, member.name) ?? fallback;
       return typeof value === "string" ? `'${value}'` : value.toString();
     })
     .join(" | ");
+};
+
+export const resolveEnumMemberIndex = (
+  e: Enum,
+  name: string,
+): number | undefined => {
+  const index = Array.from(e.members.values()).findIndex((member) => {
+    return member.name === name;
+  });
+  if (index === -1) {
+    return;
+  }
+  return index;
 };

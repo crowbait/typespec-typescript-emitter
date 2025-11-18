@@ -70,7 +70,13 @@ const emitTypes = (
           `export function is${m.name}(arg: any): arg is ${m.name} {`,
         );
         file = file.addLine("return (", 1);
-        getTypeguardModel(m, "arg", undefined, n)[0]
+        getTypeguardModel(
+          m,
+          "arg",
+          undefined,
+          n,
+          !!options["serializable-date-types"],
+        )[0]
           .split("\n")
           .forEach((line) => {
             file = file.addLine(line, 1);

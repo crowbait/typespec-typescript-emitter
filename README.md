@@ -46,6 +46,8 @@ options:
     enable-typeguards: false
     enable-routes: false
     enable-routed-typemap: false
+    string-nominal-enums: false
+    serializable-date-types: false
 ```
 
 The following options are available:
@@ -56,6 +58,8 @@ The following options are available:
 - `enable-typeguards` (default: false): enables output of typeguards, *IF* type-output is enabled.
 - `enable-routes` (default: false): enables output of the HTTP-routes object.
 - `enable-routed-typemap` (default: false): enables output of an indexable type mapping paths and HTTP verbs to request and response bodies.
+- `string-nominal-enums` (default: false): outputs member names as strings instead of index values for enum members declared without explicit values (routed typemap only, see [example](#routed-typemap)).
+- `serializable-date-types` (default: false): outputs serializable types for typespec's dates types that match OpenApi spec. Types like `offsetDateTime`, `plainDate` and `utcDateTime` will be emitted as `string` and `unixTimestamp32` as `number`.
 
 ## Types Emitter
 
@@ -237,9 +241,20 @@ Example:
 ```ts
 @route("/typemap")
 namespace namespaceA.typemap {
+  enum State {
+    ACTIVE,
+    INACTIVE
+  }
+  enum Condition {
+    NEW = 'new',
+    USED = 'used'
+  }
+
   model ModelA {
     id: int32,
-    name: string
+    name: string,
+    state: State,
+    cond: Condition
   }
 
   @get
@@ -266,13 +281,17 @@ export type types_namespaceA = {
       request: null
       response: {status: 200, body: {
         id: number,
-        name: string
+        name: string,
+        state: 0 | 1, // this would be `'ACTIVE' | 'INACTIVE'` with `string-nominal-enums: true`
+        cond: 'new' | 'used'
       }[]} | {status: 418, body: 'Me teapot'}
     },
     ['POST']: {
       request: {
         id: number,
-        name: string
+        name: string,
+        state: 0 | 1, // this would be `'ACTIVE' | 'INACTIVE'` with `string-nominal-enums: true`
+        cond: 'new' | 'used'
       }
       response: {status: 200, body: {
         /** The status code. */
