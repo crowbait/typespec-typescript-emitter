@@ -1,3 +1,13 @@
+# [1.2.0](https://github.com/crowbait/typespec-typescript-emitter/compare/v1.1.2...v1.2.0) (2025-11-18)
+
+
+### Features
+
+* serializable-date-types ([ba4775d](https://github.com/crowbait/typespec-typescript-emitter/commit/ba4775d2292dcec4436470b19e9c1aea3b9b3e70))
+* string-nominal-enums ([a0b572c](https://github.com/crowbait/typespec-typescript-emitter/commit/a0b572c2f19baa5d100663458f2ea1ad182b4323))
+
+
+
 ## [1.1.2](https://github.com/crowbait/typespec-typescript-emitter/compare/v1.1.1...v1.1.2) (2025-11-17)
 
 
@@ -32,15 +42,6 @@
 ### BREAKING CHANGES
 
 * This breaks existing configurations and - depending on how it was used - usage of the emitted routes object.
-
-
-
-## [0.4.1](https://github.com/crowbait/typespec-typescript-emitter/compare/v0.4.0...v0.4.1) (2025-02-25)
-
-
-### Bug Fixes
-
-* fixed eslint ignore directives ([9c0477a](https://github.com/crowbait/typespec-typescript-emitter/commit/9c0477a6925715b99c38d4133d04ee774a0a65f7))
 
 
 
