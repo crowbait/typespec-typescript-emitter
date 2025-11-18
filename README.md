@@ -24,6 +24,7 @@ It can the following things:
     - [Aliases](#aliases)
   - [Routes Emitter](#routes-emitter)
   - [Routed Typemap](#routed-typemap)
+  - [Contributing](#contributing)
 
 ## Installation
 
@@ -338,3 +339,11 @@ Additional notes:
 
 - There is currently no built-in way of accessing typeguards from paths their types may be associated with.
 - Models are not reused in or imported by this emitter. Reasoning involves "no runtime overhead either way", "simpler code", "self-contained emitter modules" and "you're not supposed to rummage around in the generated files anyway, just import them"; this has been touched upon in [#4](https://github.com/crowbait/typespec-typescript-emitter/issues/4#issuecomment-2720955282) and [#6](https://github.com/crowbait/typespec-typescript-emitter/issues/6#issuecomment-3049999155).
+
+## Contributing
+
+Thank you for investing time into this project.
+
+Currently, only one guideline is active:
+
+- use [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/#specification)
