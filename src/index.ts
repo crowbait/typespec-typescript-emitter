@@ -1,2 +1,2 @@
 export { $onEmit } from "./emitter.js";
-export { $lib } from "./lib.js";
+export { $lib, EmitterOptions } from "./lib.js";
