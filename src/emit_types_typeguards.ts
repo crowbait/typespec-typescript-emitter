@@ -112,6 +112,10 @@ export const getTypeguard = (
       }
     case "Boolean":
       return [`typeof ${accessor} === 'boolean'`, []];
+    case "Enum":
+    case "EnumMember":
+      // can't typeguard enums
+      return ["true", []];
     case "Intrinsic":
       switch (t.name) {
         case "unknown":
@@ -136,6 +140,9 @@ export const getTypeguard = (
       break;
     case "String":
       return [`typeof ${accessor} === 'string'`, []];
+    case "TemplateParameter":
+      // template parameters resolve to unknown, which can't be typeguarded
+      return ["true", []];
     case "Tuple": {
       // TODO: ['string1', 'string2'] gets resolved as [string, string] instead of literals. Why?
       const imports: string[] = [];
@@ -178,7 +185,7 @@ export const getTypeguard = (
       ];
     }
     default:
-      console.warn("Could not resolve type:", t.kind);
+      console.warn("Could not resolve typeguard:", t.kind);
   }
   return ["true", []]; // fallback to not break everything in case of errors
 };

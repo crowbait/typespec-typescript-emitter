@@ -41,27 +41,6 @@ export const resolveType = (t: Type, opts: CommonOptions): string => {
     case "Enum":
       typeStr = resolveEnum(t, opts);
       break;
-    case "Intrinsic":
-      typeStr = t.name;
-      break;
-    case "Number":
-      typeStr = t.valueAsString;
-      break;
-    case "Scalar":
-      typeStr = resolveScalar(
-        t,
-        !!opts.context.options["serializable-date-types"],
-      );
-      break;
-    case "String":
-      typeStr = `'${t.value}'`;
-      break;
-    case "Tuple":
-      typeStr = resolveTuple(t, opts);
-      break;
-    case "Union":
-      typeStr = resolveUnion(t, opts);
-      break;
     case "EnumMember":
       if (opts.resolveEvenWithName) {
         // If we're at routed typemap we will emit enum either value or index / name (as string if configured)
@@ -79,6 +58,30 @@ export const resolveType = (t: Type, opts: CommonOptions): string => {
         break;
       }
       typeStr = `${t.enum.name}.${t.name}`;
+      break;
+    case "Intrinsic":
+      typeStr = t.name;
+      break;
+    case "Number":
+      typeStr = t.valueAsString;
+      break;
+    case "Scalar":
+      typeStr = resolveScalar(
+        t,
+        !!opts.context.options["serializable-date-types"],
+      );
+      break;
+    case "String":
+      typeStr = `'${t.value}'`;
+      break;
+    case "TemplateParameter":
+      typeStr = "unknown";
+      break;
+    case "Tuple":
+      typeStr = resolveTuple(t, opts);
+      break;
+    case "Union":
+      typeStr = resolveUnion(t, opts);
       break;
     default:
       console.warn("Could not resolve type:", t.kind);
