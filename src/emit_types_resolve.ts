@@ -4,13 +4,16 @@ import {
   Enum,
   getDoc,
   Model,
+  ModelProperty,
   Namespace,
   RecordModelType,
+  RekeyableMap,
   Scalar,
   Tuple,
   Type,
   Union,
 } from "@typespec/compiler";
+import { createRekeyableMap } from "@typespec/compiler/utils";
 import { isVisible, Visibility } from "@typespec/http";
 
 type CommonOptions = {
@@ -215,7 +218,19 @@ export const resolveModel = (m: Model, opts: CommonOptions): string => {
     return m.name;
   let ret = "{\n";
   let i = 1;
-  m.properties.forEach((p) => {
+  const getPropertiesRecursively = (
+    model: Model,
+  ): RekeyableMap<string, ModelProperty> => {
+    let props = model.properties;
+    if (model.baseModel !== undefined) {
+      props = createRekeyableMap([
+        ...getPropertiesRecursively(model.baseModel),
+        ...props,
+      ]);
+    }
+    return props;
+  };
+  getPropertiesRecursively(m).forEach((p) => {
     if (
       opts.visibility === undefined ||
       isVisible(opts.context.program, p, opts.visibility)
