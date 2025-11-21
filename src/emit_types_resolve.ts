@@ -193,7 +193,7 @@ export const resolveScalar = (
       ret = serializableDates ? "number" : "Date";
       break;
     default:
-      console.warn("Could not resolve scalar:", s.name);
+      ret = "unknown";
   }
 
   if (serializableDates && s.name === "unixTimestamp32") {
