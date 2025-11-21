@@ -113,7 +113,13 @@ export const getTypeguard = (
     case "Boolean":
       return [`typeof ${accessor} === 'boolean'`, []];
     case "Intrinsic":
-      return [`${accessor} === ${t.name}`, []];
+      switch (t.name) {
+        case "unknown":
+          // can't typeguard "unknown"
+          return ["true", []];
+        default:
+          return [`${accessor} === ${t.name}`, []];
+      }
     case "Number":
       return [`typeof ${accessor} === 'number'`, []];
     case "Scalar":

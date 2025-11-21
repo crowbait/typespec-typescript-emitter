@@ -229,8 +229,6 @@ export const resolveModel = (m: Model, opts: CommonOptions): string => {
         nestlevel: opts.nestlevel + 1,
         isNamespaceRoot: false,
       });
-      if (typeStr.includes("unknown"))
-        console.warn(`Could not resolve property ${p.name} on ${m.name}`);
       ret = ret.addLine(
         `${p.name}${p.optional ? "?" : ""}: ${typeStr}${i < m.properties.size ? "," : ""}`,
         opts.nestlevel + 1,
