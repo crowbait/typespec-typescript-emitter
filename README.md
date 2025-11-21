@@ -344,6 +344,4 @@ Additional notes:
 
 Thank you for investing time into this project.
 
-Currently, only one guideline is active:
-
-- use [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/#specification)
+Please use [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/#specification).
