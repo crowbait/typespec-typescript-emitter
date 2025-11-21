@@ -126,9 +126,15 @@ export const resolveEnum = (e: Enum, opts: CommonOptions): string => {
   e.members.forEach((p) => {
     const val =
       p.value === undefined
-        ? ""
+        ? opts.context.options["string-nominal-enums"]
+          ? ` = '${p.name}'`
+          : ""
         : " = " +
-          (typeof p.value === "string" ? `'${p.value}'` : p.value.toString());
+          (typeof p.value === "string"
+            ? `'${p.value}'`
+            : opts.context.options["string-nominal-enums"]
+              ? `'${p.name}'`
+              : p.value.toString());
     ret = ret.addLine(
       `${p.name.includes("-") ? `'${p.name}'` : p.name}${val}${i < e.members.size ? "," : ""}`,
       opts.nestlevel + 1,

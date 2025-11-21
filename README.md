@@ -59,7 +59,7 @@ The following options are available:
 - `enable-typeguards` (default: false): enables output of typeguards, *IF* type-output is enabled.
 - `enable-routes` (default: false): enables output of the HTTP-routes object.
 - `enable-routed-typemap` (default: false): enables output of an indexable type mapping paths and HTTP verbs to request and response bodies.
-- `string-nominal-enums` (default: false): outputs member names as strings instead of index values for enum members declared without explicit values (routed typemap only, see [example](#routed-typemap)).
+- `string-nominal-enums` (default: false): outputs member names as strings instead of index values for enum members declared without explicit values.
 - `serializable-date-types` (default: false): outputs serializable types for typespec's dates types that match OpenApi spec. Types like `offsetDateTime`, `plainDate` and `utcDateTime` will be emitted as `string` and `unixTimestamp32` as `number`.
 
 ## Types Emitter
@@ -108,7 +108,7 @@ namespace myProject { // remember to set in config!
 ```ts
 /* /path/to/outdir/MyProject.ts */
 export enum ReadStatus {
-  Never,
+  Never,  // or `Never = "Never",` - if `string-nominal-enums` is set
   Once,
   Often
 }
