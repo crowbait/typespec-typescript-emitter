@@ -41,7 +41,9 @@ emit:
   - "typespec-typescript-emitter"
 options:
   "typespec-typescript-emitter":
-    root-namespace: "string"
+    root-namespaces:
+      - "namespace1"
+      - "namespace2"
     out-dir: "{cwd}/path"
     enable-types: true
     enable-typeguards: false
@@ -53,32 +55,32 @@ options:
 
 The following options are available:
 
-- `root-namespace` **(required)**: name of the most outer namespace. As the TypeSpec docs recommend, your project is expected to consist of one or more nested namespaces. Here, you need to specify the most outer / general namespace you want emitted.
+- `root-namespaces` **(required)**: array of names of all namespaces in your program you want to emit from. You don't need to specify namespaces nested inside other namespaces, as the ones listed will be traversed recursively.
 - `out-dir`: output directory. Must be an absolute path; replacers like `{cwd}` are permitted.
 - `enable-types` (default: true): enables output of TypeScript types.
-- `enable-typeguards` (default: false): enables output of typeguards, *IF* type-output is enabled.
+- `enable-typeguards` (default: false, **requires** `enable-types`): enables output of typeguards, *IF* type-output is enabled.
 - `enable-routes` (default: false): enables output of the HTTP-routes object.
-- `enable-routed-typemap` (default: false): enables output of an indexable type mapping paths and HTTP verbs to request and response bodies.
+- `enable-routed-typemap` (default: false, **requires** `enable-types`): enables output of an indexable type mapping paths and HTTP verbs to request and response bodies.
 - `string-nominal-enums` (default: false): outputs member names as strings instead of index values for enum members declared without explicit values.
 - `serializable-date-types` (default: false): outputs serializable types for typespec's dates types that match OpenApi spec. Types like `offsetDateTime`, `plainDate` and `utcDateTime` will be emitted as `string` and `unixTimestamp32` as `number`.
 
 ## Types Emitter
 
-This emitter will traverse your configured root namespace and all nested namespaces, generating a `{namespace-name}.ts`-file.
+This emitter will traverse all namespaces, generating files for each (nested) namespace.
 
 The emitter can handle `Model`s, `Enum`s and `Union`s. ~~`Alias`'s~~ are *not* emitted - more on that [later](#aliases). It will also preserve docs as JSDoc-style comments.
 
 The emitter should be able to handle most basic TS contructs, like scalars, literals, object, arrays, tuples and intrinsics (eg. `null`).
 
 > [!IMPORTANT]
-> These types do not respect most transformative decorators, notable `@visibility`.
+> These types do not respect most transformative decorators, notably `@visibility`.
 > This is because it's non-trivial to do, has unexpected problems and the functionality is *somewhat* already there, in the form of [Routed Typemaps](#routed-typemap).
 > For additional information, see [#7](https://github.com/crowbait/typespec-typescript-emitter/issues/7).
 
 Example:
 
 ```ts
-namespace myProject { // remember to set in config!
+namespace myProject {
   enum ReadStatus {
     Never,
     Once,
@@ -334,11 +336,6 @@ type T_update2 = types_namespaceA[typeof routes_namespaceA.typemap.add.path]['PO
 >
 > - assumes a `200` status code for an op's response type if you didn't define any (first responses on `getAll` and `getOne` ops)
 > - assumes the entire response type is the body of no body is explicitely decorated (418 on `getOne` op) (this is non-standard; I have seen quite a few projects not realizing the response definition should have a body *in* it and treating the whole thing as a body; so while technically "wrong", this accomodates those projects. You can easily define a truly empty body using `{}`, `""`, `null`..., see 419 on `getOne` op)
-
-Additional notes:
-
-- There is currently no built-in way of accessing typeguards from paths their types may be associated with.
-- Models are not reused in or imported by this emitter. Reasoning involves "no runtime overhead either way", "simpler code", "self-contained emitter modules" and "you're not supposed to rummage around in the generated files anyway, just import them"; this has been touched upon in [#4](https://github.com/crowbait/typespec-typescript-emitter/issues/4#issuecomment-2720955282) and [#6](https://github.com/crowbait/typespec-typescript-emitter/issues/6#issuecomment-3049999155).
 
 ## Contributing
 

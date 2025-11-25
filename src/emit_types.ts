@@ -1,103 +1,88 @@
-import { EmitContext, getDoc, Namespace } from "@typespec/compiler";
-import {
-  resolveEnum,
-  resolveModel,
-  resolveUnion,
-} from "./emit_types_resolve.js";
-import { getTypeguardModel } from "./emit_types_typeguards.js";
-import { EmitterOptions } from "./lib.js";
+import {EmitContext, emitFile, resolvePath} from '@typespec/compiler';
+import {AppendableString} from './helpers/appendableString.js';
+import {unique2D} from './helpers/arrays.js';
+import autogenerateWarning from './helpers/autogenerateWarning.js';
+import {TTypeMap} from './helpers/buildTypeMap.js';
+import {getImports} from './helpers/getImports.js';
+import {filenameFromNamespaces} from './helpers/namespaces.js';
+import {EmitterOptions} from './lib.js';
+import {resolve, Resolver} from './resolve/resolve.js';
 
-const emitTypes = (
-  context: EmitContext,
-  namespace: Namespace,
-  options: EmitterOptions,
-): {
-  files: Record<string, string>;
-  typeguardedNames: Array<{ filename: string; name: string }>;
-} => {
-  const out: ReturnType<typeof emitTypes> = { files: {}, typeguardedNames: [] };
+export const emitTypes = async (
+  context: EmitContext<EmitterOptions>,
+  typemap: TTypeMap
+): Promise<void> => {
+  // maps file names to file contents
+  const files: Record<string, AppendableString> = {};
+  // maps file names to list of required imports
+  const imports: Record<string, TTypeMap[number]["namespaces"][]> = {}
 
-  const traverseNamespace = (n: Namespace): void => {
-    let file = "";
-
-    n.enums.forEach((e) => {
-      if (options["enable-types"]) {
-        const resolved = resolveEnum(e, {
-          context: context,
-          currentNamespace: n,
-          nestlevel: 0,
-          isNamespaceRoot: true,
-        });
-        if (resolved) {
-          const doc = getDoc(context.program, e);
-          if (doc) file = file.addLine(`/** ${doc} */`);
-          file = file.addLine(`export enum ${e.name} ${resolved};\n`);
-        }
-      }
+  // generate files
+  typemap.forEach(t => {
+    files[filenameFromNamespaces(t.namespaces)] = new AppendableString();
+    imports[filenameFromNamespaces(t.namespaces)] = []
+  });
+  
+  // resolve all types
+  for (let i = 0; i < typemap.length; i++) {
+    const t = typemap[i];
+    const filename = filenameFromNamespaces(t.namespaces);
+    const resolved = await resolve(Resolver.Type, t.type, {
+      "context": context,
+      "emitDocs": true,
+      "nestlevel": 0,
+      "originalType": t,
+      "typemap": typemap
     });
-    n.unions.forEach((u) => {
-      if (options["enable-types"]) {
-        const resolved = resolveUnion(u, {
-          currentNamespace: n,
-          context,
-          nestlevel: 0,
-          isNamespaceRoot: true,
-        });
-        if (resolved) {
-          const doc = getDoc(context.program, u);
-          if (doc) file = file.addLine(`/** ${doc} */`);
-          file = file.addLine(`export type ${u.name} = ${resolved};\n`);
-        }
+  
+    imports[filename].push(...resolved.imports);
+    let declaration = "export ";
+    switch (t.type.kind) {
+      case "Enum":
+        declaration += `enum ${t.type.name}`;
+        break;
+      case "Model":
+        declaration += `interface ${t.type.name}`;
+        break;
+      case "Union":
+        declaration += `type ${t.type.name} =`;
+        break;
+    }
+    if (resolved.doc) files[filename].addLine(`/** ${resolved.doc} */`);
+    files[filename].addLine(`${declaration} ${resolved.resolved.value}`);
+    
+    if (context.options["enable-typeguards"]) {
+      const typeguard = await resolve(Resolver.Typeguard, t.type, {
+        "context": context,
+        "nestlevel": 1,
+        "originalType": t,
+        "typemap": typemap,
+        "accessor": "t"
+      });
+      if (typeguard.resolved.value) {
+        files[filename].addLine(`export function is${t.type.name}(t: any, visibility?: Visibility): t is ${t.type.name} {return (${typeguard.resolved})}`);
+        imports[filename].push(...typeguard.imports);
       }
-    });
-    n.models.forEach((m) => {
-      if (options["enable-types"]) {
-        const resolved = resolveModel(m, {
-          nestlevel: 0,
-          currentNamespace: n,
-          context,
-          isNamespaceRoot: true,
-        });
-        if (resolved) {
-          const doc = getDoc(context.program, m);
-          if (doc) file = file.addLine(`/** ${doc} */`);
-          file = file.addLine(`export interface ${m.name} ${resolved};`);
-        }
-      }
+    }
 
-      if (options["enable-typeguards"]) {
-        file = file.addLine(
-          `export function is${m.name}(arg: any): arg is ${m.name} {`,
-        );
-        file = file.addLine("return (", 1);
-        getTypeguardModel(
-          m,
-          "arg",
-          undefined,
-          n,
-          !!options["serializable-date-types"],
-        )[0]
-          .split("\n")
-          .forEach((line) => {
-            file = file.addLine(line, 1);
-          });
-        file = file.addLine(");", 1);
-        file = file.addLine("};");
-        out.typeguardedNames.push({
-          filename: n.name.charAt(0).toUpperCase() + n.name.slice(1),
-          name: m.name,
-        });
-      }
-      file += "\n";
-    });
-    // set output for this namespace
-    out.files[n.name.charAt(0).toUpperCase() + n.name.slice(1)] = file;
-    // recursively iterate child namespaces
-    n.namespaces.forEach((ns) => traverseNamespace(ns));
+    files[filename].append("\n");
   };
-  traverseNamespace(namespace);
 
-  return out;
-};
+  const filesArr = Object.entries(files).filter(f => !!f[1].value)
+  for (let i = 0; i < filesArr.length; i++) {
+    if (!filesArr[i][1].value) continue;
+    const filename = filesArr[i][0];
+  
+    imports[filename] = unique2D(imports[filename]);
+    const importStrings = getImports(imports[filename].filter(i => filenameFromNamespaces(i) !== filename));
+    if (context.options["enable-typeguards"]) {
+      importStrings.push("import {Visibility} from '@typespec/http';")
+    }
 
-export default emitTypes;
+    const content = `/* eslint-disable */\n\n${autogenerateWarning}\n${importStrings.join("\n")}\n\n${filesArr[i][1].value}`;
+    await emitFile(context.program, {
+      path: resolvePath(context.options['out-dir'], filename),
+      content: content
+    });
+  };
+}
