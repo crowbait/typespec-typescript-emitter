@@ -9,15 +9,16 @@ export class AppendableString {
   private _content: string;
 
   get value(): string { return this._content }
-  append(s?: string) { this._content += s ?? "" }
+  append(s?: string | AppendableString) { this._content += s ?? "" }
 
   /** Changes in place, returning the new value */
   addLine(
-    str: string,
+    str: string | AppendableString,
     tabs?: number,
     continued: "continued" | "line-end" = "line-end"
-  ): void {
+  ): this {
     this._content += `${"  ".repeat(tabs ?? 0)}${str}${continued === "continued" ? "" : "\n"}`;
+    return this;
   }
 
   [Symbol.toPrimitive](hint: string) { 
@@ -35,7 +36,10 @@ export class AppendableString {
   }
 
   /** Removes the last x characters */
-  dropLast(n: number = 1): void {
+  dropLast(n: number = 1): this {
     this._content = this._content.substring(0, this._content.length - n);
+    return this;
   }
+
+  clear(): this { this._content = ""; return this; }
 }

@@ -1,14 +1,14 @@
-import {Model as TSP_Model} from '@typespec/compiler';
+import {Model} from '@typespec/compiler';
 import {Resolvable} from '../Resolvable.js';
-import {resolve, Resolver, ResolverOptions, ResolverResult} from '../resolve.js';
+import {Resolver, ResolverOptions, ResolverResult} from '../Resolvable_helpers.js';
 
 enum Type {
   Array,
   Record
 }
 
-export class IndexedModel extends Resolvable<TSP_Model> {
-  constructor(t: TSP_Model, r: Resolver) {
+export class IndexedModel extends Resolvable<Model> {
+  constructor(t: Model, r: Resolver) {
     super(t, r);
     if (t.name === "Array") {
       this._indexedModelKind = Type.Array;
@@ -20,8 +20,14 @@ export class IndexedModel extends Resolvable<TSP_Model> {
   private _indexedModelKind: Type;
   protected expectedTypeKind: string = "Model";
 
+  public override async hasVisibility(opts: ResolverOptions<Resolver>, out: ResolverResult<Resolver>): Promise<boolean> {
+    if (await super.hasVisibility(opts, out)) return true;
+    if (await Resolvable.hasVisibility(this._t.indexer!.value, opts, out, this._t)) return true;
+    return false;
+  }
+
   protected async type(opts: ResolverOptions<Resolver.Type>, out: ResolverResult<Resolver.Type>): Promise<void> {
-    const resolved = await resolve(this._r, this._t.indexer!.value, opts);
+    const resolved = await this.resolveNested(this._t.indexer!.value, opts, out, false)
     switch (this._indexedModelKind) {
       case Type.Array:
         out.resolved.append(`(${resolved.resolved})[]`);
@@ -36,7 +42,7 @@ export class IndexedModel extends Resolvable<TSP_Model> {
   protected async typeguard(opts: ResolverOptions<Resolver.Typeguard>, out: ResolverResult<Resolver.Typeguard>): Promise<void> {
     const oldAccessor = opts.accessor;
     opts.accessor = "v";
-    const resolved = await resolve(this._r, this._t.indexer!.value, opts);
+    const resolved = await this.resolveNested(this._t.indexer!.value, opts, out)
     opts.accessor = oldAccessor;
     if (resolved.resolved.value.endsWith("\n")) resolved.resolved.dropLast();
 

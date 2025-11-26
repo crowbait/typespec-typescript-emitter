@@ -1,8 +1,9 @@
 import {EmitContext, Operation, Type} from '@typespec/compiler';
-import {getHttpOperation, resolveRequestVisibility, Visibility} from '@typespec/http';
+import {getHttpOperation} from '@typespec/http';
 import {TTypeMap} from '../helpers/buildTypeMap.js';
 import {EmitterOptions} from '../lib.js';
-import {resolve, Resolver} from './resolve.js';
+import {Resolvable} from './Resolvable.js';
+import {Resolver} from './Resolvable_helpers.js';
 
 /** Maps a route path to its typemap definition and required imports */
 export type TOperationTypemap = {
@@ -30,13 +31,8 @@ export const resolveOperationTypemap = async (
 
 // request
   if (httpOp.parameters.body) {
-    const resolved = await resolve(Resolver.Type, httpOp.parameters.body.type, {
-      context, emitDocs: false, nestlevel: 3, originalType: null, typemap, andInsteadOfExtend: true,
-      visibility: resolveRequestVisibility(
-        context.program,
-        op,
-        httpOp.verb,
-      )
+    const resolved = await Resolvable.resolve(Resolver.Type, httpOp.parameters.body.type, {
+      context, emitDocs: false, nestlevel: 3, rootType: null, typemap, rootTypeReady: true
     });
     ret.imports.push(...resolved.imports);
     ret.types.request = resolved.resolved.value;
@@ -67,9 +63,8 @@ export const resolveOperationTypemap = async (
               ) modelret.status = prop[1].type.value;
               // find body definiton
               if (decorator.definition?.name === "@body") {
-                const resolved = await resolve(Resolver.Type, prop[1].type, {
-                  context, emitDocs: false, nestlevel: 3, originalType: null, typemap,
-                  andInsteadOfExtend: true, visibility: Visibility.Read
+                const resolved = await Resolvable.resolve(Resolver.Type, prop[1].type, {
+                  context, emitDocs: false, nestlevel: 3, rootType: null, typemap, rootTypeReady: true
                 });
                 ret.imports.push(...resolved.imports);
                 modelret.body = resolved.resolved.value;
@@ -79,9 +74,8 @@ export const resolveOperationTypemap = async (
           }
 
           if (!wasFullyQualified) {
-            const resolved = await resolve(Resolver.Type, t, {
-              context, emitDocs: false, nestlevel: 3, originalType: null, typemap,
-              andInsteadOfExtend: true, visibility: Visibility.Read
+            const resolved = await Resolvable.resolve(Resolver.Type, t, {
+              context, emitDocs: false, nestlevel: 3, rootType: null, typemap, rootTypeReady: true
             });
             ret.imports.push(...resolved.imports);
             modelret.body = resolved.resolved.value;
@@ -102,8 +96,8 @@ export const resolveOperationTypemap = async (
       
         default: {
           // return type does not have a qualified body; making one up and resolving that one
-          const resolved = await resolve(Resolver.Type, t, {
-            context, emitDocs: false, nestlevel: 3, originalType: null, typemap, andInsteadOfExtend: true
+          const resolved = await Resolvable.resolve(Resolver.Type, t, {
+            context, emitDocs: false, nestlevel: 3, rootType: null, typemap, rootTypeReady: true
           });
           ret.imports.push(...resolved.imports);
           responseRet.push({

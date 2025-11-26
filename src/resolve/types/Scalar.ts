@@ -1,6 +1,6 @@
 import {Scalar} from '@typespec/compiler';
 import {Resolvable} from '../Resolvable.js';
-import {Resolver, ResolverOptions, ResolverResult, resolve} from '../resolve.js';
+import {Resolver, ResolverOptions, ResolverResult} from '../Resolvable_helpers.js';
 
 export class ResolvableScalar extends Resolvable<Scalar> {
   protected expectedTypeKind = "Scalar";
@@ -19,7 +19,7 @@ export class ResolvableScalar extends Resolvable<Scalar> {
           break;
       }
     } else if (this._t.baseScalar) {
-      out.resolved.append((await resolve(this._r, this._t.baseScalar, opts)).resolved.value);
+      out.resolved.append((await this.resolveNested(this._t.baseScalar, opts, out)).resolved)
     } else {
       switch (this._t.name) {
         case "boolean": out.resolved.append("boolean"); break;
@@ -63,7 +63,7 @@ export class ResolvableScalar extends Resolvable<Scalar> {
           break;
       }
     } else if (this._t.baseScalar) {
-      out.resolved.append((await resolve(this._r, this._t.baseScalar, opts)).resolved.value);
+      out.resolved.append((await this.resolveNested(this._t.baseScalar, opts, out)).resolved)
     } else if (this._t.name === "bytes") {
       out.resolved.append(`${opts.accessor} instanceof Uint8Array`);
     } else {

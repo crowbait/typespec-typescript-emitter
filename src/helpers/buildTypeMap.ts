@@ -3,7 +3,8 @@ import {EmitterOptions} from '../lib.js';
 
 export type TTypeMap = {
   type: Enum | Model | Union,
-  namespaces: string[]
+  namespaces: string[],
+  hasVisibility: boolean | undefined
 }[]
 
 /**
@@ -19,7 +20,8 @@ export const buildTypeMap = (context: EmitContext<EmitterOptions>): TTypeMap => 
     if (!t.name) return;
     map.push({
       type: t,
-      namespaces: hierarchy
+      namespaces: hierarchy,
+      hasVisibility: undefined
     });
   }
 

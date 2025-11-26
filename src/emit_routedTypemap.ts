@@ -4,8 +4,20 @@ import {unique2D} from './helpers/arrays.js';
 import autogenerateWarning from './helpers/autogenerateWarning.js';
 import {TTypeMap} from './helpers/buildTypeMap.js';
 import {getImports} from './helpers/getImports.js';
+import {visibilityHelperFileName} from './helpers/visibilityHelperFile.js';
 import {EmitterOptions} from './lib.js';
 import {resolveOperationTypemap, TOperationTypemap} from './resolve/operationTypemap.js';
+
+/** Maps HTTP verbs to lifecycle states. See @typespec/compiler/.../visibility.tsp */
+const VerbToLifecycle = {
+  RETURN: ["Read"], // for all return types
+  POST: ["Create"],
+  PUT: ["Create", "Update"],
+  PATCH: ["Update"],
+  DELETE: ["Delete"],
+  GET: ["Query"], // *parameters* of request, return type is still RETURN
+  Head: ["Query"]
+};
 
 export const emitRoutedTypemap = async (
   context: EmitContext<EmitterOptions>,
@@ -46,7 +58,6 @@ export const emitRoutedTypemap = async (
 // resolving operations
   for (const ns of Object.entries(foundOps)) {
     for (const op of ns[1]) {
-      console.log(op.namespace?.name);
       const resolved = await resolveOperationTypemap(context, typemap, op);
       const httpOp = getHttpOperation(context.program, op)[0];
 
@@ -59,17 +70,28 @@ export const emitRoutedTypemap = async (
     }
   }
 
+// lifecycle assignment helper
+  const replaceLifecycle = (resolved: string, verb: string): string => {
+    const opLifecycle = VerbToLifecycle[verb as keyof typeof VerbToLifecycle];
+    return resolved.replaceAll(
+      "V>",
+      `V extends Lifecycle.All ? (${opLifecycle.map(l => `Lifecycle.${l}`).join(" | ")}) : V>`
+    );
+  }
+
 // emitting
   for (const ns of Object.entries(namespaceOps)) {
     const importStrings = getImports(unique2D(namespaceImports[ns[0]]));
-    let out = `export type type_${ns[0]} = {\n`;
+    importStrings.push(`import {Lifecycle, FilterLifecycle} from './${visibilityHelperFileName}'`);
+
+    let out = `export type type_${ns[0]}<V extends Lifecycle = Lifecycle.All> = {\n`;
     out += Object.entries(ns[1]).map((path) => {
       let pathret = `  ['${path[0]}']: {\n`;
       pathret += Object.entries(path[1])
         .map((verb) => {
           let verbret = `    ['${verb[0]}']: {\n`;
-          verbret +=    `      request: ${verb[1].request}\n`;
-          verbret +=    `      response: ${verb[1].response.map((res) => `{status: ${res.status}, body: ${res.body}}`).join(" | ")}\n`;
+          verbret +=    `      request: ${replaceLifecycle(verb[1].request, "RETURN")}\n`;
+          verbret +=    `      response: ${replaceLifecycle(verb[1].response.map((res) => `{status: ${res.status}, body: ${res.body}}`).join(" | "), verb[0])}\n`;
           verbret +=    "    }";
           return verbret;
         })

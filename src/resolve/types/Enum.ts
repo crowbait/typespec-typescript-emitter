@@ -2,7 +2,7 @@ import {Enum, EnumMember, getDoc} from '@typespec/compiler';
 import {compareArrays} from '../../helpers/arrays.js';
 import {namespaceListFromNamespace} from '../../helpers/namespaces.js';
 import {Resolvable} from '../Resolvable.js';
-import {Resolver, ResolverOptions, ResolverResult} from '../resolve.js';
+import {Resolver, ResolverOptions, ResolverResult} from '../Resolvable_helpers.js';
 
 /** 
  * This resolves Enums completely, meaning it doesn't try to resolve
@@ -26,8 +26,9 @@ export class ResolvableEnum extends Resolvable<Enum> {
     out.resolved.addLine("}", opts.nestlevel, "continued");
   }
 
-  protected async typeguard(opts: ResolverOptions<Resolver.Typeguard>, out: ResolverResult<Resolver.Typeguard>): Promise<void> {
-    out.resolved.append("true");
+  protected async typeguard(): Promise<void> {
+    // enums cannot have typeguards
+    return
   }
 }
 

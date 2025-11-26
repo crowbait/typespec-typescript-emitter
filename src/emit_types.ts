@@ -5,8 +5,10 @@ import autogenerateWarning from './helpers/autogenerateWarning.js';
 import {TTypeMap} from './helpers/buildTypeMap.js';
 import {getImports} from './helpers/getImports.js';
 import {filenameFromNamespaces} from './helpers/namespaces.js';
+import {visibilityHelperFileName} from './helpers/visibilityHelperFile.js';
 import {EmitterOptions} from './lib.js';
-import {resolve, Resolver} from './resolve/resolve.js';
+import {Resolvable} from './resolve/Resolvable.js';
+import {Resolver} from './resolve/Resolvable_helpers.js';
 
 export const emitTypes = async (
   context: EmitContext<EmitterOptions>,
@@ -15,53 +17,75 @@ export const emitTypes = async (
   // maps file names to file contents
   const files: Record<string, AppendableString> = {};
   // maps file names to list of required imports
-  const imports: Record<string, TTypeMap[number]["namespaces"][]> = {}
+  const imports: Record<string, {
+    namespaces: TTypeMap[number]["namespaces"][],
+    lifecycleTypes: string[]
+  }> = {}
 
   // generate files
   typemap.forEach(t => {
     files[filenameFromNamespaces(t.namespaces)] = new AppendableString();
-    imports[filenameFromNamespaces(t.namespaces)] = []
+    imports[filenameFromNamespaces(t.namespaces)] = {namespaces: [], lifecycleTypes: []};
   });
   
   // resolve all types
   for (let i = 0; i < typemap.length; i++) {
     const t = typemap[i];
     const filename = filenameFromNamespaces(t.namespaces);
-    const resolved = await resolve(Resolver.Type, t.type, {
-      "context": context,
-      "emitDocs": true,
-      "nestlevel": 0,
-      "originalType": t,
-      "typemap": typemap
+    const resolved = await Resolvable.resolve(Resolver.Type, t.type, {
+      context: context,
+      emitDocs: true,
+      nestlevel: 0,
+      rootType: t,
+      typemap: typemap
     });
   
-    imports[filename].push(...resolved.imports);
+    imports[filename].namespaces.push(...resolved.imports);
     let declaration = "export ";
+    console.log(t.type.name, resolved.hasVisibility)
     switch (t.type.kind) {
       case "Enum":
         declaration += `enum ${t.type.name}`;
         break;
       case "Model":
-        declaration += `interface ${t.type.name}`;
+        declaration += `type ${t.type.name}<V extends Lifecycle = Lifecycle.All> =`;
+        // Making ALL types generic (regardless of whether they need it) improves ease-of-use,
+        // both for the user as well for the dev when accessing known types.
+        // declaration += `type ${t.type.name}${resolved.hasVisibility ? "<V extends Lifecycle = Lifecycle.All>" : ""} =`;
         break;
       case "Union":
-        declaration += `type ${t.type.name} =`;
+        declaration += `type ${t.type.name}<V extends Lifecycle = Lifecycle.All> =`;
+        // declaration += `type ${t.type.name}${resolved.hasVisibility ? "<V extends Lifecycle = Lifecycle.All>" : ""} =`;
         break;
     }
     if (resolved.doc) files[filename].addLine(`/** ${resolved.doc} */`);
-    files[filename].addLine(`${declaration} ${resolved.resolved.value}`);
+    
+    if (resolved.hasVisibility) imports[filename].lifecycleTypes.push("FilterLifecycle", "Lifecycle");
+    if (
+      (t.type as any).kind === "Model" &&
+      t.type.name !== "Array" && t.type.name !== "Record" &&
+      resolved.visibilityMap.replaceAll("{", "").replaceAll("}", "").trim()
+    ) {
+      files[filename].addLine(`${declaration} FilterLifecycle<${resolved.resolved.value}, typeof ${t.type.name}_VisMap, V>`);
+      files[filename].addLine(`export const ${t.type.name}_VisMap = ${resolved.visibilityMap} as const`);
+    } else {
+      files[filename].addLine(`${declaration} ${resolved.resolved.value}`);
+    }
     
     if (context.options["enable-typeguards"]) {
-      const typeguard = await resolve(Resolver.Typeguard, t.type, {
-        "context": context,
-        "nestlevel": 1,
-        "originalType": t,
-        "typemap": typemap,
-        "accessor": "t"
+      const typeguard = await Resolvable.resolve(Resolver.Typeguard, t.type, {
+        context: context,
+        nestlevel: 1,
+        rootType: t,
+        typemap: typemap,
+        accessor: "t"
       });
+      imports[filename].lifecycleTypes.push("Lifecycle");
       if (typeguard.resolved.value) {
-        files[filename].addLine(`export function is${t.type.name}(t: any, visibility?: Visibility): t is ${t.type.name} {return (${typeguard.resolved})}`);
-        imports[filename].push(...typeguard.imports);
+        files[filename].addLine(
+          `export function is${t.type.name}(t: any, vis: Lifecycle = Lifecycle.All): t is ${t.type.name}<typeof vis> {return (${typeguard.resolved})}`
+        );
+        imports[filename].namespaces.push(...typeguard.imports);
       }
     }
 
@@ -73,11 +97,9 @@ export const emitTypes = async (
     if (!filesArr[i][1].value) continue;
     const filename = filesArr[i][0];
   
-    imports[filename] = unique2D(imports[filename]);
-    const importStrings = getImports(imports[filename].filter(i => filenameFromNamespaces(i) !== filename));
-    if (context.options["enable-typeguards"]) {
-      importStrings.push("import {Visibility} from '@typespec/http';")
-    }
+    imports[filename].namespaces = unique2D(imports[filename].namespaces);
+    const importStrings = getImports(imports[filename].namespaces.filter(i => filenameFromNamespaces(i) !== filename));
+    importStrings.push(`import {${[...new Set(imports[filename].lifecycleTypes)].join(", ")}} from './${visibilityHelperFileName}';`); // unique-ify
 
     const content = `/* eslint-disable */\n\n${autogenerateWarning}\n${importStrings.join("\n")}\n\n${filesArr[i][1].value}`;
     await emitFile(context.program, {

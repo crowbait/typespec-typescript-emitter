@@ -1,6 +1,6 @@
 import {IntrinsicType, NumericLiteral, StringLiteral, Type} from '@typespec/compiler';
 import {Resolvable} from '../Resolvable.js';
-import {Resolver, ResolverOptions, ResolverResult} from '../resolve.js';
+import {Resolver, ResolverOptions, ResolverResult} from '../Resolvable_helpers.js';
 
 const allowedTypeKinds = [
   "Boolean", "Intrinsic", "Number", "String", "TemplateParameter"

@@ -15,9 +15,16 @@ export enum Lifecycle {
   None, All
 }
 
+export type VisibilityMap<T> = {
+  [K in keyof T]?: {
+    vis?: readonly Lifecycle[]
+    nested?: VisibilityMap<T[K]>
+  }
+}
+
 export type FilterLifecycle<
   T,
-  VisibilityMap extends Record<string, Lifecycle[]>,
+  M extends VisibilityMap<T>,
   Current extends Lifecycle
 > = {
   [K in keyof T as (
@@ -25,14 +32,25 @@ export type FilterLifecycle<
       ? K
       : Current extends Lifecycle.None
         ? never
-        : K extends keyof VisibilityMap
-            ? (Current extends VisibilityMap[K][number] ? K : never)
+        : K extends keyof M
+          ? M[K] extends { vis?: readonly (infer L)[]; }
+            ? (undefined extends M[K]['vis']
+              ? K
+              : (Current extends L ? K : never)
+            )
             : K
-  )]: T[K]
+          : K
+  )]: K extends keyof M
+    ? M[K] extends {nested?: infer N}
+      ? N extends VisibilityMap<T[K]>
+        ? FilterLifecycle<T[K], N, Current>
+        : T[K]
+      : T[K]
+    : T[K]
 }
 `
 
-export const visibilityHelperFileName = "lifecycleVisibility.d.ts";
+export const visibilityHelperFileName = "lifecycleVisibility.ts";
 
 export const emitVisibilityHelperFile = async (context: EmitContext<EmitterOptions>): Promise<void> => {
   await emitFile(context.program, {
