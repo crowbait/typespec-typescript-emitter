@@ -84,7 +84,7 @@ export const emitRoutedTypemap = async (
     const importStrings = getImports(unique2D(namespaceImports[ns[0]]));
     importStrings.push(`import {Lifecycle, FilterLifecycle} from './${visibilityHelperFileName}'`);
 
-    let out = `export type type_${ns[0]}<V extends Lifecycle = Lifecycle.All> = {\n`;
+    let out = `export type types_${ns[0]}<V extends Lifecycle = Lifecycle.All> = {\n`;
     out += Object.entries(ns[1]).map((path) => {
       let pathret = `  ['${path[0]}']: {\n`;
       pathret += Object.entries(path[1])
@@ -107,5 +107,6 @@ export const emitRoutedTypemap = async (
     });
   }
 
+  // restore un-mutated version
   context.options["root-namespaces"] = targetedNamespaces;
 }

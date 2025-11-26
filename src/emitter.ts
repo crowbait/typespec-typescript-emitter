@@ -2,6 +2,7 @@ import {
   EmitContext
 } from "@typespec/compiler";
 import {emitRoutedTypemap} from './emit_routedTypemap.js';
+import {emitRoutes} from './emit_routes.js';
 import {emitTypes} from './emit_types.js';
 import {buildTypeMap} from './helpers/buildTypeMap.js';
 import {setContext} from './helpers/diagnostics.js';
@@ -17,6 +18,7 @@ export async function $onEmit(context: EmitContext<EmitterOptions>) {
   const typeMap = buildTypeMap(context);
   if (context.options["enable-types"]) await emitTypes(context, typeMap);
   if (context.options["enable-routed-typemap"]) await emitRoutedTypemap(context, typeMap);
+  if (context.options["enable-routes"]) await emitRoutes(context);
 
   await emitVisibilityHelperFile(context);
 }

@@ -47,6 +47,7 @@ export const buildTypeMap = (context: EmitContext<EmitterOptions>): TTypeMap => 
     }
   });
 
+  // restore un-mutated version
   context.options["root-namespaces"] = targetedNamespaces;
   return map;
 }
