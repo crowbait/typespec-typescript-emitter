@@ -16,7 +16,7 @@ export const getTypeguardModel = (
         const propName = property[1].name;
         const propType = property[1].type;
 
-        // Handle intrinsics specially
+        // Handle `void`, `unknown` and `never`
         if (propType.kind === "Intrinsic") {
           if (propType.name === "never") {
             return (
@@ -32,11 +32,6 @@ export const getTypeguardModel = (
             return (
               `  `.repeat(nestingLevel) +
               `${accessor}['${propName}'] === undefined`
-            );
-          }
-          if (propType.name === "null") {
-            return (
-              `  `.repeat(nestingLevel) + `${accessor}['${propName}'] === null`
             );
           }
         }
