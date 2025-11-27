@@ -15,7 +15,7 @@ export default tsEslint.config(
       "**/test/targets/**/*",
     ],
     rules: {
-      "@typescript-eslint/no-explicit-any": "off"
-    }
+      "@typescript-eslint/no-explicit-any": "off",
+    },
   },
 );

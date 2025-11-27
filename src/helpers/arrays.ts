@@ -1,11 +1,10 @@
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const compareArrays = (a: any[], b: any[]): boolean => {
   if (a.length !== b.length) return false;
   for (let i = 0; i < a.length; i++) {
     if (a[i] !== b[i]) return false;
   }
   return true;
-}
+};
 
 /** Unique-ifies a 2D array of strings (imported namespaces list). */
 export const unique2D = (rows: string[][]): string[][] => {
@@ -19,4 +18,4 @@ export const unique2D = (rows: string[][]): string[][] => {
     }
   }
   return out;
-}
+};

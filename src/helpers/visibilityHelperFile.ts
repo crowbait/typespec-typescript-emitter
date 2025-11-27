@@ -1,5 +1,5 @@
-import {EmitContext, emitFile, resolvePath} from '@typespec/compiler';
-import {EmitterOptions} from '../lib.js';
+import { emitFile, Program, resolvePath } from "@typespec/compiler";
+import { EmitterOptions } from "../lib.js";
 
 const visibilityHelperFile = `
 /* eslint-disable */
@@ -48,13 +48,16 @@ export type FilterLifecycle<
       : T[K]
     : T[K]
 }
-`
+`;
 
 export const visibilityHelperFileName = "lifecycleVisibility.ts";
 
-export const emitVisibilityHelperFile = async (context: EmitContext<EmitterOptions>): Promise<void> => {
-  await emitFile(context.program, {
-    path: resolvePath(context.options['out-dir'], visibilityHelperFileName),
-    content: visibilityHelperFile
+export const emitVisibilityHelperFile = async (
+  program: Program,
+  options: EmitterOptions,
+): Promise<void> => {
+  await emitFile(program, {
+    path: resolvePath(options["out-dir"], visibilityHelperFileName),
+    content: visibilityHelperFile,
   });
-}
+};

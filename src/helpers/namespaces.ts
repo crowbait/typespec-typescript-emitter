@@ -1,7 +1,9 @@
-import {Namespace} from '@typespec/compiler';
+import { Namespace } from "@typespec/compiler";
 
 /** Traverses *up* a namespace, generating a hierarchy array from itself and its parents. */
-export const namespaceListFromNamespace = (n: Namespace | undefined): string[] | null => {
+export const namespaceListFromNamespace = (
+  n: Namespace | undefined,
+): string[] | null => {
   if (!n) return null;
   const ret: string[] = [];
   let cur: Namespace | undefined = n;
@@ -10,6 +12,7 @@ export const namespaceListFromNamespace = (n: Namespace | undefined): string[] |
     cur = cur.namespace;
   }
   return ret;
-}
+};
 
-export const filenameFromNamespaces = (ns: string[]): string => `${ns.join(".")}.ts`;
+export const filenameFromNamespaces = (ns: string[]): string =>
+  `${ns.join(".")}.ts`;

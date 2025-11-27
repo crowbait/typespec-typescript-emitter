@@ -1,46 +1,59 @@
-import {EmitContext, Operation, Type} from '@typespec/compiler';
-import {getHttpOperation} from '@typespec/http';
-import {TTypeMap} from '../helpers/buildTypeMap.js';
-import {EmitterOptions} from '../lib.js';
-import {Resolvable} from './Resolvable.js';
-import {Resolver} from './Resolvable_helpers.js';
+import { Operation, Program, Type } from "@typespec/compiler";
+import { getHttpOperation } from "@typespec/http";
+import { TTypeMap } from "../helpers/buildTypeMap.js";
+import { EmitterOptions } from "../lib.js";
+import { Resolvable } from "./Resolvable.js";
+import { Resolver } from "./Resolvable_helpers.js";
 
 /** Maps a route path to its typemap definition and required imports */
 export type TOperationTypemap = {
   // "string" in these does not refer to the type "string"; it's the typescript code *as* string.
   request: string;
   response: Array<{ status: number | "unknown"; body: string }>;
-}
+};
 
 export const resolveOperationTypemap = async (
-  context: EmitContext<EmitterOptions>,
+  program: Program,
+  options: EmitterOptions,
   typemap: TTypeMap,
-  op: Operation
+  op: Operation,
 ): Promise<{
-  types: TOperationTypemap,
-  imports: TTypeMap[number]["namespaces"][]
+  types: TOperationTypemap;
+  imports: TTypeMap[number]["namespaces"][];
 }> => {
-  const httpOp = getHttpOperation(context.program, op)[0];
+  const httpOp = getHttpOperation(program, op)[0];
   const ret: Awaited<ReturnType<typeof resolveOperationTypemap>> = {
     types: {
       request: "null",
-      response: []
+      response: [],
     },
-    imports: []
+    imports: [],
   };
 
-// request
+  // request
   if (httpOp.parameters.body) {
-    const resolved = await Resolvable.resolve(Resolver.Type, httpOp.parameters.body.type, {
-      context, emitDocs: false, nestlevel: 3, rootType: null, typemap, rootTypeReady: true
-    });
+    const resolved = await Resolvable.resolve(
+      Resolver.Type,
+      httpOp.parameters.body.type,
+      {
+        program,
+        options,
+        emitDocs: false,
+        nestlevel: 3,
+        rootType: null,
+        typemap,
+        rootTypeReady: true,
+      },
+    );
     ret.imports.push(...resolved.imports);
     ret.types.request = resolved.resolved.value;
   }
 
-// response
+  // response
   if (op.returnType) {
-    const getReturnType = async (t: Type): Promise<{status: number | "unknown"; body: string;}[]> => {
+    const getReturnType = async (
+      t: Type,
+    ): Promise<{ status: number | "unknown"; body: string }[]> => {
       const responseRet: TOperationTypemap["response"] = [];
 
       switch (t.kind) {
@@ -49,7 +62,7 @@ export const resolveOperationTypemap = async (
           // qualified response with status and body.
           const modelret: TOperationTypemap["response"][number] = {
             status: 200,
-            body: "{}"
+            body: "{}",
           };
 
           // check for fully qualified response or plain body
@@ -60,12 +73,23 @@ export const resolveOperationTypemap = async (
               if (
                 decorator.definition?.name === "@statusCode" &&
                 prop[1].type.kind === "Number"
-              ) modelret.status = prop[1].type.value;
+              )
+                modelret.status = prop[1].type.value;
               // find body definiton
               if (decorator.definition?.name === "@body") {
-                const resolved = await Resolvable.resolve(Resolver.Type, prop[1].type, {
-                  context, emitDocs: false, nestlevel: 3, rootType: null, typemap, rootTypeReady: true
-                });
+                const resolved = await Resolvable.resolve(
+                  Resolver.Type,
+                  prop[1].type,
+                  {
+                    program,
+                    options,
+                    emitDocs: false,
+                    nestlevel: 3,
+                    rootType: null,
+                    typemap,
+                    rootTypeReady: true,
+                  },
+                );
                 ret.imports.push(...resolved.imports);
                 modelret.body = resolved.resolved.value;
                 wasFullyQualified = true;
@@ -75,7 +99,13 @@ export const resolveOperationTypemap = async (
 
           if (!wasFullyQualified) {
             const resolved = await Resolvable.resolve(Resolver.Type, t, {
-              context, emitDocs: false, nestlevel: 3, rootType: null, typemap, rootTypeReady: true
+              program,
+              options,
+              emitDocs: false,
+              nestlevel: 3,
+              rootType: null,
+              typemap,
+              rootTypeReady: true,
             });
             ret.imports.push(...resolved.imports);
             modelret.body = resolved.resolved.value;
@@ -93,25 +123,31 @@ export const resolveOperationTypemap = async (
           }
           break;
         }
-      
+
         default: {
           // return type does not have a qualified body; making one up and resolving that one
           const resolved = await Resolvable.resolve(Resolver.Type, t, {
-            context, emitDocs: false, nestlevel: 3, rootType: null, typemap, rootTypeReady: true
+            program,
+            options,
+            emitDocs: false,
+            nestlevel: 3,
+            rootType: null,
+            typemap,
+            rootTypeReady: true,
           });
           ret.imports.push(...resolved.imports);
           responseRet.push({
             status: 200,
-            body: resolved.resolved.value
+            body: resolved.resolved.value,
           });
           break;
         }
       }
-      
+
       return responseRet;
-    }
+    };
     ret.types.response = await getReturnType(op.returnType);
   }
 
   return ret;
-}
+};

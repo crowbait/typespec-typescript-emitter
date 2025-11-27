@@ -8,20 +8,24 @@ export class AppendableString {
 
   private _content: string;
 
-  get value(): string { return this._content }
-  append(s?: string | AppendableString) { this._content += s ?? "" }
+  get value(): string {
+    return this._content;
+  }
+  append(s?: string | AppendableString) {
+    this._content += s ?? "";
+  }
 
   /** Changes in place, returning the new value */
   addLine(
     str: string | AppendableString,
     tabs?: number,
-    continued: "continued" | "line-end" = "line-end"
+    continued: "continued" | "line-end" = "line-end",
   ): this {
     this._content += `${"  ".repeat(tabs ?? 0)}${str}${continued === "continued" ? "" : "\n"}`;
     return this;
   }
 
-  [Symbol.toPrimitive](hint: string) { 
+  [Symbol.toPrimitive](hint: string) {
     switch (hint) {
       case "default":
       case "string":
@@ -29,7 +33,7 @@ export class AppendableString {
 
       case "boolean":
         return !!this.value;
-    
+
       default:
         throw new TypeError(`Appendable string cannot be coerced to ${hint}`);
     }
@@ -41,5 +45,8 @@ export class AppendableString {
     return this;
   }
 
-  clear(): this { this._content = ""; return this; }
+  clear(): this {
+    this._content = "";
+    return this;
+  }
 }

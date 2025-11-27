@@ -1,4 +1,8 @@
-import {createTypeSpecLibrary, EmitContext, JSONSchemaType} from "@typespec/compiler";
+import {
+  createTypeSpecLibrary,
+  EmitContext,
+  JSONSchemaType,
+} from "@typespec/compiler";
 
 export interface EmitterOptions {
   "root-namespaces": string[];
@@ -28,9 +32,11 @@ const EmitterOptionsSchema: JSONSchemaType<EmitterOptions> = {
 };
 
 /** Maps option to its default value and options that must be set to `true` for this one to work */
-export const optionDependencies = (context: EmitContext):
-  {[K in keyof EmitterOptions]: [EmitterOptions[K], (keyof EmitterOptions)[]]} => 
-({
+export const optionDependencies = (
+  context: EmitContext,
+): {
+  [K in keyof EmitterOptions]: [EmitterOptions[K], (keyof EmitterOptions)[]];
+} => ({
   ["root-namespaces"]: [[], []],
   ["out-dir"]: [context.emitterOutputDir, []],
   ["enable-types"]: [false, []],
@@ -39,7 +45,7 @@ export const optionDependencies = (context: EmitContext):
   ["serializable-date-types"]: [false, []],
 
   ["enable-typeguards"]: [false, ["enable-types"]],
-  ["enable-routed-typemap"]: [false, ["enable-types"]]
+  ["enable-routed-typemap"]: [false, ["enable-types"]],
 });
 
 export const $lib = createTypeSpecLibrary({
