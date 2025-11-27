@@ -208,9 +208,10 @@ export abstract class Resolvable<T extends Type> {
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected transformKnownType(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     opts: ResolverOptions<Resolver>,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     out: ResolverResult<Resolver>,
   ): void {}
 

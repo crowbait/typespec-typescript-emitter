@@ -242,14 +242,29 @@ export class ShapedModel extends Resolvable<Model> {
       if (visibility !== null) {
         guard += `((vis as any) === Lifecycle.All || ([${(visibility ?? []).map((t) => `Lifecycle.${t}`).join(", ")}].includes(vis) && (`;
       }
-      guard += prop.optional
-        ? `${opts.accessor}['${prop.name}'] === undefined || `
-        : `${opts.accessor}['${prop.name}'] !== undefined && `;
-      guard += `(${resolved.resolved}`;
-      guard += resolved.resolved.value.endsWith("\n")
-        ? "  ".repeat(opts.nestlevel)
-        : "";
-      guard += ")";
+      if (
+        prop.type.kind === "Intrinsic" &&
+        ["never", "void"].includes(prop.type.name)
+      ) {
+        // some special intrinsic types need special treatment
+        switch (prop.type.name) {
+          case "never":
+            guard += `!('${prop.name}' in ${opts.accessor})`;
+            break;
+          case "void":
+            guard += `${opts.accessor}['${prop.name}'] === undefined`;
+            break;
+        }
+      } else {
+        guard += prop.optional
+          ? `${opts.accessor}['${prop.name}'] === undefined || `
+          : `${opts.accessor}['${prop.name}'] !== undefined && `;
+        guard += `(${resolved.resolved}`;
+        guard += resolved.resolved.value.endsWith("\n")
+          ? "  ".repeat(opts.nestlevel)
+          : "";
+        guard += ")";
+      }
       if (visibility !== null) guard += ")))";
       propGuards.push(guard);
     }

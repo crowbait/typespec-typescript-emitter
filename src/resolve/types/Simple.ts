@@ -54,10 +54,22 @@ export class ResolvableSimple extends Resolvable<Type> {
         this._t.kind as (typeof allowedTypeKinds)[number]
       ]; // check is in validate()
     const v = mapped(this._t);
-    if (v === "unknown") {
-      out.resolved.append(`true`);
-    } else {
-      out.resolved.append(`${opts.accessor} === ${v}`);
+
+    // some special intrinsic types are handled directly in the model property
+    switch (v) {
+      case "unknown":
+        out.resolved.append("true");
+        break;
+      case "never":
+        out.resolved.append("false");
+        break; // instantly fails all type checks
+      case "void":
+        out.resolved.append(`${opts.accessor} === undefined`);
+        break;
+
+      default:
+        out.resolved.append(`${opts.accessor} === ${v}`);
+        break;
     }
   }
 
