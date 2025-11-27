@@ -13,6 +13,34 @@ export const getTypeguardModel = (
   return [
     Array.from(m.properties)
       .map((property) => {
+        const propName = property[1].name;
+        const propType = property[1].type;
+
+        // Handle intrinsics specially
+        if (propType.kind === "Intrinsic") {
+          if (propType.name === "never") {
+            return (
+              `  `.repeat(nestingLevel) + `!('${propName}' in ${accessor})`
+            );
+          }
+          if (propType.name === "unknown") {
+            return property[1].optional
+              ? `  `.repeat(nestingLevel) + `'${propName}' in ${accessor}`
+              : `  `.repeat(nestingLevel) + `'${propName}' in ${accessor}`;
+          }
+          if (propType.name === "void") {
+            return (
+              `  `.repeat(nestingLevel) +
+              `${accessor}['${propName}'] === undefined`
+            );
+          }
+          if (propType.name === "null") {
+            return (
+              `  `.repeat(nestingLevel) + `${accessor}['${propName}'] === null`
+            );
+          }
+        }
+
         const guard = getTypeguard(
           property[1].type,
           `${accessor}['${property[1].name}']`,
@@ -113,6 +141,9 @@ export const getTypeguard = (
     case "Boolean":
       return [`typeof ${accessor} === 'boolean'`, []];
     case "Intrinsic":
+      if (t.name === "never") return ["false", []];
+      if (t.name === "unknown") return ["true", []];
+      if (t.name === "void") return [`${accessor} === undefined`, []];
       return [`${accessor} === ${t.name}`, []];
     case "Number":
       return [`typeof ${accessor} === 'number'`, []];
