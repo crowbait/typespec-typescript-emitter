@@ -88,7 +88,5 @@ const resolveEnumMemberValue = (
     : " = " +
         (typeof member.value === "string"
           ? `'${member.value}'`
-          : opts.options["string-nominal-enums"]
-            ? `'${member.name}'`
-            : member.value.toString());
+          : member.value.toString());
 };

@@ -33,39 +33,54 @@ export const expectEmit = (
   });
 };
 
-export const expectTypeResolution = (
-  desc: string,
-  input: string,
-  target: string,
-  test?: (t: Type, r: ResolverResult<Resolver.Type>) => true | string,
-  typename: string = "test",
-  config: typeof defaultConfig = defaultConfig,
-) => {
+export const expectTypeResolution = (args: {
+  type: string;
+  desc?: string;
+  source: string;
+  target: string;
+  test?: (t: Type, r: ResolverResult<Resolver.Type>) => true | string;
+  typename?: string;
+  config?: Partial<typeof defaultConfig>;
+}) => {
+  if (!args.typename) args.typename = "test";
+  if (!args.config) {
+    args.config = defaultConfig;
+  } else {
+    args.config = { ...defaultConfig, ...args.config };
+  }
+
   const transformResult = (s: string): string =>
     s
       .split("\n")
       .map((l) => l.trim())
       .join("");
-  it(`type: ${desc}`, async () => {
+
+  it(`type: ${args.type} ${args.desc ?? ""}`, async () => {
     const { program } = await runner.compile(
-      input,
-      config as Record<string, any>,
+      args.source,
+      args.config as Record<string, any>,
     );
-    const result = program.resolveTypeReference(typename);
+    // get compiled type
+    const result = program.resolveTypeReference(args.typename!);
+    // check for diagnostics
     if (result[1].length > 0) console.error(result[1]);
     expect(result[1].length).toBe(0); // no diagnostics
+    // type compiled and expected type.kind?
     expect(result[0]).toBeDefined();
+    expect(result[0]?.kind).toBe(args.type);
+    // resolve to typescript
     const resolved = await Resolvable.resolve(Resolver.Type, result[0]!, {
       program,
-      options: config as any,
+      options: args.config as EmitterOptions,
       nestlevel: 0,
       rootType: null,
       typemap: [],
       emitDocs: false,
     });
     expect(transformResult(resolved.resolved.value)).toBe(
-      transformResult(transformResult(target)),
+      transformResult(transformResult(args.target)),
     );
-    if (test !== undefined) expect(await test(result[0]!, resolved)).toBe(true);
+    if (args.test !== undefined)
+      expect(await args.test(result[0]!, resolved)).toBe(true);
   });
 };

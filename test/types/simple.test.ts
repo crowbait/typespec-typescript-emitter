@@ -10,14 +10,10 @@ const tests: [Type["kind"], any[]][] = [
 
 tests.forEach((test) => {
   test[1].forEach((v) =>
-    expectTypeResolution(
-      `simple: ${test[0]} (${v})`,
-      `alias test = ${v};`,
-      v.toString().replaceAll('"', "'"),
-      (t) => {
-        if (t.kind !== test[0]) return `Type was ${t.kind}`;
-        return true;
-      },
-    ),
+    expectTypeResolution({
+      type: test[0],
+      source: `alias test = ${v};`,
+      target: v.toString().replaceAll('"', "'"),
+    }),
   );
 });
