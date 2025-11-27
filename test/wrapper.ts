@@ -4,6 +4,7 @@ import { EmitterOptions } from "../src/lib";
 import { Resolvable } from "../src/resolve/Resolvable";
 import { Resolver, ResolverResult } from "../src/resolve/Resolvable_helpers";
 import { runner } from "./runner";
+import { validateTS } from "./ts";
 
 export const defaultConfig: Omit<EmitterOptions, "out-dir"> = {
   "root-namespaces": ["test"],
@@ -34,13 +35,23 @@ export const expectEmit = (
 };
 
 export const expectTypeResolution = (args: {
+  /** Kind of the type we expect to get (@typespec/compiler.Type['kind']) */
   type: string;
   desc?: string;
+  /** Source TSP */
   source: string;
+  /** Expected TS output */
   target: string;
+  /** Either `true` (all okay) or error message */
   test?: (t: Type, r: ResolverResult<Resolver.Type>) => true | string;
+  /** Name of the type to compile; used to get type from program. */
   typename?: string;
   config?: Partial<typeof defaultConfig>;
+  /**
+   * If set, the TSP output will be put through this before checking typescript validity.
+   * Default is `type test = ${output}`.
+   */
+  typescriptTransformer?: (tsp: string) => string;
 }) => {
   if (!args.typename) args.typename = "test";
   if (!args.config) {
@@ -54,6 +65,8 @@ export const expectTypeResolution = (args: {
       .split("\n")
       .map((l) => l.trim())
       .join("");
+  if (args.typescriptTransformer == undefined)
+    args.typescriptTransformer = (tsp) => `type test = ${tsp};`;
 
   it(`type: ${args.type} ${args.desc ?? ""}`, async () => {
     const { program } = await runner.compile(
@@ -77,6 +90,12 @@ export const expectTypeResolution = (args: {
       typemap: [],
       emitDocs: false,
     });
+    // check if valid typescript
+    const tsCode = args.typescriptTransformer!(resolved.resolved.value);
+    let tsValidity = validateTS(tsCode);
+    if (tsValidity !== true) tsValidity += `\nTypescript: ${tsCode}`;
+    expect(tsValidity).toBe(true);
+    // check generated typescript content
     expect(transformResult(resolved.resolved.value)).toBe(
       transformResult(transformResult(args.target)),
     );

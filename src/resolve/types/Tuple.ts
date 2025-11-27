@@ -30,7 +30,7 @@ export class ResolvableTuple extends Resolvable<Tuple> {
       out.imports.push(...resolved.imports);
       results.push(resolved.resolved.value);
     }
-    out.resolved.append(results.join(", "));
+    out.resolved.append(`[${results.join(", ")}]`);
   }
 
   protected async typeguard(
@@ -49,7 +49,7 @@ export class ResolvableTuple extends Resolvable<Tuple> {
     }
     opts.accessor = oldAccessor;
     out.resolved.append(
-      `Array.isArray(${opts.accessor} && ${results.map((g) => `(${g})`).join(" && ")}`,
+      `Array.isArray(${opts.accessor} && ${results.map((g) => `(${g})`).join(" && ")})`,
     );
   }
 }

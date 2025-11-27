@@ -51,5 +51,6 @@ tests.forEach((test) => {
     source: test[1],
     target: test[2],
     config: test[3],
+    typescriptTransformer: (tsp) => `enum test ${tsp}`,
   });
 });
