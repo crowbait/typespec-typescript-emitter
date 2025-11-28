@@ -1,6 +1,7 @@
 import { Scalar } from "@typespec/compiler";
 import { EmitterOptions } from "../../src/lib";
-import { expectTypeResolution } from "../wrapper";
+import { Resolver } from "../../src/resolve/Resolvable_helpers";
+import { expectResolution } from "../wrapper";
 
 type Name = string;
 type Target = string;
@@ -36,7 +37,7 @@ const tests: [Name, Target, Partial<EmitterOptions>?][] = [
 ];
 
 tests.forEach((test) => {
-  expectTypeResolution({
+  expectResolution(Resolver.Type, {
     type: "Scalar",
     desc: test[2]
       ? `{${Object.entries(test[2]).map((p) => `${p[0]}: ${p[1]}`)}}`

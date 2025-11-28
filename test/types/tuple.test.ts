@@ -1,4 +1,5 @@
-import { expectTypeResolution } from "../wrapper";
+import { Resolver } from "../../src/resolve/Resolvable_helpers";
+import { expectResolution } from "../wrapper";
 
 type Name = string;
 type Source = string;
@@ -19,7 +20,7 @@ const tests: [Name, Source, Target][] = [
 ];
 
 tests.forEach((test) => {
-  expectTypeResolution({
+  expectResolution(Resolver.Type, {
     type: "Tuple",
     desc: test[0],
     source: `alias test = ${test[1]};`,

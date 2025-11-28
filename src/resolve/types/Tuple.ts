@@ -43,13 +43,14 @@ export class ResolvableTuple extends Resolvable<Tuple> {
     for (const v of this._t.values) {
       opts.accessor = `${opts.accessor}[${i}]`;
       const resolved = await this.resolveNested(v, opts, out);
+      opts.accessor = oldAccessor;
       out.imports.push(...resolved.imports);
       results.push(resolved.resolved.value);
       i++;
     }
     opts.accessor = oldAccessor;
     out.resolved.append(
-      `Array.isArray(${opts.accessor} && ${results.map((g) => `(${g})`).join(" && ")})`,
+      `Array.isArray(${opts.accessor}) && ${results.map((g) => `(${g})`).join(" && ")}`,
     );
   }
 }

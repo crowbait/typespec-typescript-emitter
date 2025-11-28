@@ -1,4 +1,5 @@
-import { expectTypeResolution } from "../wrapper";
+import { Resolver } from "../../src/resolve/Resolvable_helpers";
+import { expectResolution } from "../wrapper";
 
 const tests: [string, string][] = [
   ["{s: string}", "{s: string}"],
@@ -13,7 +14,7 @@ const tests: [string, string][] = [
 ];
 
 tests.forEach((test) => {
-  expectTypeResolution({
+  expectResolution(Resolver.Type, {
     type: "Model",
     desc: test[0],
     source: `alias test = ${test[0]};`,

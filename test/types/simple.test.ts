@@ -1,5 +1,6 @@
 import { Type } from "@typespec/compiler";
-import { expectTypeResolution } from "../wrapper";
+import { Resolver } from "../../src/resolve/Resolvable_helpers";
+import { expectResolution } from "../wrapper";
 
 const tests: [Type["kind"], any[]][] = [
   ["Boolean", ["true", "false"]],
@@ -10,7 +11,7 @@ const tests: [Type["kind"], any[]][] = [
 
 tests.forEach((test) => {
   test[1].forEach((v) =>
-    expectTypeResolution({
+    expectResolution(Resolver.Type, {
       type: test[0],
       source: `alias test = ${v};`,
       target: v.toString().replaceAll('"', "'"),

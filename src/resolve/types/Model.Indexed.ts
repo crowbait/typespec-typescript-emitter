@@ -65,7 +65,7 @@ export class IndexedModel extends Resolvable<Model> {
     out: ResolverResult<Resolver.Typeguard>,
   ): Promise<void> {
     const oldAccessor = opts.accessor;
-    opts.accessor = "v";
+    opts.accessor = this._indexedModelKind === Type.Array ? "v" : "v[1]";
     const resolved = await this.resolveNested(
       this._t.indexer!.value,
       opts,

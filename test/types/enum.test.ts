@@ -1,5 +1,6 @@
 import { EmitterOptions } from "../../src/lib";
-import { expectTypeResolution } from "../wrapper";
+import { Resolver } from "../../src/resolve/Resolvable_helpers";
+import { expectResolution } from "../wrapper";
 
 type Name = string;
 type Source = string;
@@ -45,7 +46,7 @@ const tests: [Name, Source, Target, Partial<EmitterOptions>][] = [
 ];
 
 tests.forEach((test) => {
-  expectTypeResolution({
+  expectResolution(Resolver.Type, {
     type: "Enum",
     desc: test[0],
     source: test[1],

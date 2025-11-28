@@ -45,7 +45,7 @@ export class ResolvableUnion extends Resolvable<Union> {
     for (const v of Array.from(this._t.variants)) {
       const resolved = await this.resolveNested(v[1].type, opts, out);
       out.imports.push(...resolved.imports);
-      results.push(resolved.resolved.value);
+      results.push(`(${resolved.resolved.value})`);
     }
     out.resolved.append(results.join(" || "));
   }
