@@ -240,7 +240,7 @@ export class ShapedModel extends Resolvable<Model> {
         out.resolved.value.endsWith("&") ? 1 : opts.nestlevel * 2,
       );
       if (visibility !== null) {
-        guard += `((vis as any) === Lifecycle.All || ([${(visibility ?? []).map((t) => `Lifecycle.${t}`).join(", ")}].includes(vis) && (`;
+        guard += `((vis as any) !== Lifecycle.All && ![${(visibility ?? []).map((t) => `Lifecycle.${t}`).join(", ")}].includes(vis) ? !('${prop.name}' in ${opts.accessor}) : (`;
       }
       if (
         prop.type.kind === "Intrinsic" &&
@@ -265,7 +265,7 @@ export class ShapedModel extends Resolvable<Model> {
           : "";
         guard += ")";
       }
-      if (visibility !== null) guard += ")))";
+      if (visibility !== null) guard += "))";
       propGuards.push(guard);
     }
     out.resolved.append(propGuards.join(" &&\n"));

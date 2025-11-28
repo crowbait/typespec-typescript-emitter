@@ -9,12 +9,12 @@ const target = `
 FilterLifecycle<{
   id_onlyRead: number,
   name: string,
-  aliasedName: string,
+  aliasedName?: string,
   date: string,
   time: string,
   created_onlyCreate: number,
   tuple_strIntModel_readQuery: [string, number, {inmodel_union: null | unknown}],
-  nested: {
+  nested?: {
     availability: boolean
   },
   array: (string)[],
@@ -30,7 +30,7 @@ FilterLifecycle<{
     }
   },
   nestedInnerVis: {
-    unk: unknown,
+    unk?: unknown,
     void_onlyUpdate: void
   },
   tupleWithUnion: [string, number | boolean]

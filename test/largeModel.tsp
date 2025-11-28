@@ -6,14 +6,14 @@ model test {
   @visibility(Lifecycle.Read)
   id_onlyRead: uint64,
   name: string,
-  aliasedName: aliasedString,
+  aliasedName?: aliasedString,
   date: utcDateTime,
   time: plainTime,
   @visibility(Lifecycle.Create)
   created_onlyCreate: unixTimestamp32,
   @visibility(Lifecycle.Read, Lifecycle.Query)
   tuple_strIntModel_readQuery: [string, int16, {inmodel_union: null | unknown}],
-  nested: {
+  nested?: {
     availability: boolean
   },
   array: string[],
@@ -32,7 +32,7 @@ model test {
     }
   },
   nestedInnerVis: {
-    unk: unknown,
+    unk?: unknown,
     @visibility(Lifecycle.Update)
     void_onlyUpdate: void
   },
