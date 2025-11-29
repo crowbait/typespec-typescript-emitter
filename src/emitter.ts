@@ -14,6 +14,7 @@ export async function $onEmit(context: EmitContext<EmitterOptions>) {
   parseOptions(context);
 
   const typeMap = buildTypeMap(context.program, context.options);
+
   if (context.options["enable-types"])
     await emitTypes(context.program, context.options, typeMap);
   if (context.options["enable-routed-typemap"])

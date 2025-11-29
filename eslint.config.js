@@ -11,8 +11,7 @@ export default tsEslint.config(
       "**/.temp/**/*",
       "**/*.md",
       "**/node_modules/**/*",
-      "**/test/out/**/*",
-      "**/test/targets/**/*",
+      "**/test/**/*.target.*",
     ],
     rules: {
       "@typescript-eslint/no-explicit-any": "off",

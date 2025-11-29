@@ -50,7 +50,6 @@ export const emitTypes = async (
 
     imports[filename].namespaces.push(...resolved.imports);
     let declaration = "export ";
-    console.log(t.type.name, resolved.hasVisibility);
     switch (t.type.kind) {
       case "Enum":
         declaration += `enum ${t.type.name}`;

@@ -1,9 +1,12 @@
 import { readFileSync } from "fs";
 import { join } from "path";
 import { Resolver } from "../../src/resolve/Resolvable_helpers";
-import { expectResolution } from "../wrapper";
+import { expectResolution } from "../helpers/wrapper";
 
-const input = readFileSync(join(__dirname, "..", "largeModel.tsp"), "utf8");
+const input = readFileSync(
+  join(__dirname, "..", "helpers", "largeModel.tsp"),
+  "utf8",
+);
 
 const target = `
 FilterLifecycle<{

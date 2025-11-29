@@ -1,8 +1,9 @@
 import { Type } from "@typespec/compiler";
+import { resolveVirtualPath } from "@typespec/compiler/testing";
 import { expect, it } from "vitest";
-import { EmitterOptions } from "../src/lib";
-import { Resolvable } from "../src/resolve/Resolvable";
-import { Resolver, ResolverResult } from "../src/resolve/Resolvable_helpers";
+import { EmitterOptions } from "../../src/lib";
+import { Resolvable } from "../../src/resolve/Resolvable";
+import { Resolver, ResolverResult } from "../../src/resolve/Resolvable_helpers";
 import { runner } from "./runner";
 import { validateTS } from "./ts";
 
@@ -16,21 +17,42 @@ export const defaultConfig: Omit<EmitterOptions, "out-dir"> = {
   "serializable-date-types": true,
 };
 
-export const expectEmit = (
+type Filename = string;
+export const expectEmit = <T extends string | Record<Filename, string>>(
   desc: string,
-  input: string,
-  expected: string,
-  config: typeof defaultConfig = defaultConfig,
-  outFilename: string = "test.ts",
+  input: T,
+  target: T,
+  config?: Partial<typeof defaultConfig>,
+  outFilename?: T extends string ? string : never,
 ): void => {
   it(desc, async () => {
-    const emitter = await runner.emit(
-      "typespec-typescript-emitter",
-      config as Record<string, any>,
-    );
+    if (!outFilename) outFilename = "test.ts" as any;
+    const emitter = await runner.emit("typespec-typescript-emitter", {
+      ...defaultConfig,
+      ...(config ?? {}),
+    });
     const result = await emitter.compileAndDiagnose(input);
-    expect(result[1].length).toBe(0); // no diagnostics
-    expect(result[0].outputs[outFilename].trim()).toBe(expected);
+
+    // check for diagnostics
+    if (result[1].length > 0) console.error(result[1]);
+    expect(result[1].length).toBe(0);
+
+    // check all files against target
+    if (typeof target === "string") {
+      if (!result[0].outputs[outFilename!])
+        console.error(
+          `${outFilename!} not found in ${Object.keys(result[0].outputs)}`,
+        );
+      expect(result[0].outputs[outFilename!].trim()).toBe(target.trim());
+    } else {
+      for (const t of Object.entries(target)) {
+        expect(
+          (
+            await result[0].program.host.readFile(resolveVirtualPath(t[0]))
+          ).text.trim(),
+        ).toBe(t[1].trim());
+      }
+    }
   });
 };
 

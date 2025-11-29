@@ -1,6 +1,6 @@
 import { Type } from "@typespec/compiler";
 import { Resolver } from "../../src/resolve/Resolvable_helpers";
-import { expectResolution } from "../wrapper";
+import { expectResolution } from "../helpers/wrapper";
 
 const tests: [Type["kind"], any[]][] = [
   ["Boolean", ["true", "false"]],

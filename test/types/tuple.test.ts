@@ -1,5 +1,5 @@
 import { Resolver } from "../../src/resolve/Resolvable_helpers";
-import { expectResolution } from "../wrapper";
+import { expectResolution } from "../helpers/wrapper";
 
 type Name = string;
 type Source = string;

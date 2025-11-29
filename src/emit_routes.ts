@@ -10,6 +10,7 @@ import {
 } from "@typespec/compiler";
 import { getAuthentication, getHttpOperation } from "@typespec/http";
 import { AppendableString } from "./helpers/appendableString.js";
+import autogenerateWarning from "./helpers/autogenerateWarning.js";
 import { EmitterOptions } from "./lib.js";
 
 export const emitRoutes = async (
@@ -34,7 +35,6 @@ export const emitRoutes = async (
     const numCollections =
       Array.from((n as any).interfaces ?? []).length +
       Array.from(((n as any).namespaces ?? []) as any[]).length;
-    console.log(n.name, numCollections);
 
     let i = 1;
     for (const op of n.operations) {
@@ -161,7 +161,7 @@ export const emitRoutes = async (
   for (const file of Object.entries(files)) {
     await emitFile(program, {
       path: resolvePath(options["out-dir"], `routes_${file[0]}.ts`),
-      content: file[1].value,
+      content: `/* eslint-disable */\n\n${autogenerateWarning}\n${file[1].value}`,
     });
   }
 
