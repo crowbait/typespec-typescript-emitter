@@ -1,4 +1,4 @@
-import { emitFile, Program, resolvePath } from "@typespec/compiler";
+import { emitFile, Program, resolvePath, Type } from "@typespec/compiler";
 import { AppendableString } from "./helpers/appendableString.js";
 import { unique2D } from "./helpers/arrays.js";
 import autogenerateWarning from "./helpers/autogenerateWarning.js";
@@ -34,6 +34,11 @@ export const emitTypes = async (
       lifecycleTypes: [],
     };
   });
+
+  const typeOrder: Type["kind"][] = ["Enum", "Model", "Union"];
+  typemap.sort(
+    (a, b) => typeOrder.indexOf(a.type.kind) - typeOrder.indexOf(b.type.kind),
+  );
 
   // resolve all types
   for (let i = 0; i < typemap.length; i++) {
