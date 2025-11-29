@@ -35,7 +35,7 @@ export const emitTypes = async (
     };
   });
 
-  const typeOrder: Type["kind"][] = ["Enum", "Model", "Union"];
+  const typeOrder: Type["kind"][] = ["Enum", "Scalar", "Model", "Union"];
   typemap.sort(
     (a, b) => typeOrder.indexOf(a.type.kind) - typeOrder.indexOf(b.type.kind),
   );
@@ -58,6 +58,9 @@ export const emitTypes = async (
     switch (t.type.kind) {
       case "Enum":
         declaration += `enum ${t.type.name}`;
+        break;
+      case "Scalar":
+        declaration += `type ${t.type.name} =`;
         break;
       case "Model":
         declaration += `type ${t.type.name}${resolved.hasVisibility ? "<V extends Lifecycle = Lifecycle.All>" : ""} =`;

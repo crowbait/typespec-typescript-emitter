@@ -5,12 +5,13 @@ import {
   navigateProgram,
   navigateTypesInNamespace,
   Program,
+  Scalar,
   Union,
 } from "@typespec/compiler";
 import { EmitterOptions } from "../lib.js";
 
 export type TTypeMap = {
-  type: Enum | Model | Union;
+  type: Enum | Model | Scalar | Union;
   namespaces: string[];
   hasVisibility: boolean | undefined;
 }[];
@@ -27,7 +28,7 @@ export const buildTypeMap = (
   const targetedNamespaces = structuredClone(options["root-namespaces"]);
   const map: TTypeMap = [];
 
-  const pushType = (t: Enum | Model | Union, hierarchy: string[]): void => {
+  const pushType = (t: TTypeMap[number]["type"], hierarchy: string[]): void => {
     if (!t.name) return;
     map.push({
       type: t,
@@ -41,6 +42,7 @@ export const buildTypeMap = (
       n,
       {
         enum: (t) => pushType(t, [...hierarchy, n.name]),
+        scalar: (t) => pushType(t, [...hierarchy, n.name]),
         model: (t) => pushType(t, [...hierarchy, n.name]),
         union: (t) => pushType(t, [...hierarchy, n.name]),
       },
