@@ -8,8 +8,14 @@ import { Resolver } from "./Resolvable_helpers.js";
 /** Maps a route path to its typemap definition and required imports */
 export type TOperationTypemap = {
   // "string" in these does not refer to the type "string"; it's the typescript code *as* string.
-  request: string;
-  response: Array<{ status: number | "unknown"; body: string }>;
+  request: { content: string; hasVisibility: boolean };
+  response: {
+    content: Array<{
+      status: number | "unknown";
+      body: string;
+      hasVisibility: boolean;
+    }>;
+  };
 };
 
 export const resolveOperationTypemap = async (
@@ -24,8 +30,8 @@ export const resolveOperationTypemap = async (
   const httpOp = getHttpOperation(program, op)[0];
   const ret: Awaited<ReturnType<typeof resolveOperationTypemap>> = {
     types: {
-      request: "null",
-      response: [],
+      request: { content: "null", hasVisibility: false },
+      response: { content: [] },
     },
     imports: [],
   };
@@ -46,23 +52,35 @@ export const resolveOperationTypemap = async (
       },
     );
     ret.imports.push(...resolved.imports);
-    ret.types.request = resolved.resolved.value;
+    ret.types.request.content = replaceLifecycle(
+      resolved.resolved.value,
+      httpOp.verb.toUpperCase(),
+      resolved.hasVisibility,
+    );
+    if (resolved.hasVisibility) ret.types.request.hasVisibility = true;
   }
 
   // response
   if (op.returnType) {
     const getReturnType = async (
       t: Type,
-    ): Promise<{ status: number | "unknown"; body: string }[]> => {
-      const responseRet: TOperationTypemap["response"] = [];
+    ): Promise<{
+      content: {
+        status: number | "unknown";
+        body: string;
+        hasVisibility: boolean;
+      }[];
+    }> => {
+      const responseRet: TOperationTypemap["response"] = { content: [] };
 
       switch (t.kind) {
         case "Model": {
           // If the return type is a model, it may either be a "blank" body or a fully
           // qualified response with status and body.
-          const modelret: TOperationTypemap["response"][number] = {
+          const modelret: TOperationTypemap["response"]["content"][number] = {
             status: 200,
             body: "{}",
+            hasVisibility: false,
           };
 
           // check for fully qualified response or plain body
@@ -90,8 +108,13 @@ export const resolveOperationTypemap = async (
                     rootTypeReady: true,
                   },
                 );
+                if (resolved.hasVisibility) modelret.hasVisibility = true;
                 ret.imports.push(...resolved.imports);
-                modelret.body = resolved.resolved.value;
+                modelret.body = replaceLifecycle(
+                  resolved.resolved.value,
+                  "RETURN",
+                  resolved.hasVisibility,
+                );
                 wasFullyQualified = true;
               }
             }
@@ -107,11 +130,16 @@ export const resolveOperationTypemap = async (
               typemap,
               rootTypeReady: true,
             });
+            if (resolved.hasVisibility) modelret.hasVisibility = true;
             ret.imports.push(...resolved.imports);
-            modelret.body = resolved.resolved.value;
+            modelret.body = replaceLifecycle(
+              resolved.resolved.value,
+              "RETURN",
+              resolved.hasVisibility,
+            );
           }
 
-          responseRet.push(modelret);
+          responseRet.content.push(modelret);
 
           break;
         }
@@ -119,7 +147,8 @@ export const resolveOperationTypemap = async (
         case "Union": {
           // if return type is a union, each variant may be fully qualified or body-only
           for (const variant of t.variants) {
-            responseRet.push(...(await getReturnType(variant[1].type)));
+            const resolved = await getReturnType(variant[1].type);
+            responseRet.content.push(...resolved.content);
           }
           break;
         }
@@ -136,9 +165,14 @@ export const resolveOperationTypemap = async (
             rootTypeReady: true,
           });
           ret.imports.push(...resolved.imports);
-          responseRet.push({
+          responseRet.content.push({
             status: 200,
-            body: resolved.resolved.value,
+            body: replaceLifecycle(
+              resolved.resolved.value,
+              httpOp.verb.toUpperCase(),
+              resolved.hasVisibility,
+            ),
+            hasVisibility: resolved.hasVisibility,
           });
           break;
         }
@@ -150,4 +184,29 @@ export const resolveOperationTypemap = async (
   }
 
   return ret;
+};
+
+/** Maps HTTP verbs to lifecycle states. See @typespec/compiler/.../visibility.tsp */
+const VerbToLifecycle = {
+  RETURN: ["Read"], // for all return types
+  POST: ["Create"],
+  PUT: ["Create", "Update"],
+  PATCH: ["Update"],
+  DELETE: ["Delete"],
+  GET: ["Query"], // *parameters* of request, return type is still RETURN
+  Head: ["Query"],
+};
+
+// lifecycle assignment helper
+const replaceLifecycle = (
+  resolved: string,
+  verb: string,
+  hasVisibility: boolean,
+): string => {
+  const opLifecycle = VerbToLifecycle[verb as keyof typeof VerbToLifecycle];
+  if (!hasVisibility) return resolved;
+  return resolved.replaceAll(
+    "V>",
+    `V extends Lifecycle.All ? (${opLifecycle.map((l) => `Lifecycle.${l}`).join(" | ")}) : V>`,
+  );
 };

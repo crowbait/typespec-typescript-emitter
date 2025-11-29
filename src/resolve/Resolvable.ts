@@ -130,7 +130,6 @@ export abstract class Resolvable<T extends Type> {
     out: ResolverResult<Resolver>,
   ): Promise<void> {
     this.validate();
-
     if (await this.hasVisibility(opts, out)) out.hasVisibility = true;
 
     // check for known resolved type

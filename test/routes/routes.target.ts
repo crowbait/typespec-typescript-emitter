@@ -19,14 +19,14 @@ export const routes_test = {
   },
   /** Creates a resource */
   postResource: {
-    verb: 'POST',
+    verb: 'PUT',
     path: '/',
     getUrl: (): string => `/`,
     auth: [null]
   },
   inner: {
     del: {
-      verb: 'POST',
+      verb: 'DELETE',
       path: '/inner',
       getUrl: (): string => `/inner`,
       auth: [null]

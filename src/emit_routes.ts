@@ -18,7 +18,7 @@ export const emitRoutes = async (
   options: EmitterOptions,
 ): Promise<void> => {
   // save original targeted namespaces array because it's mutated here
-  const targetedNamespaces = [...options["root-namespaces"]];
+  const targetedNamespaces = structuredClone(options["root-namespaces"]);
 
   const files: Record<string, AppendableString> = {};
 

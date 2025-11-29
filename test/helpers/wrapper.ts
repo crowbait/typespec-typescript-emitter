@@ -28,10 +28,11 @@ export const expectEmit = <T extends string | Record<Filename, string>>(
   it(desc, async () => {
     if (!outFilename) outFilename = "test.ts" as any;
     const emitter = await runner.emit("typespec-typescript-emitter", {
-      ...defaultConfig,
+      ...structuredClone(defaultConfig),
       ...(config ?? {}),
     });
-    const result = await emitter.compileAndDiagnose(input);
+    const instance = await emitter.createInstance();
+    const result = await instance.compileAndDiagnose(input);
 
     // check for diagnostics
     if (result[1].length > 0) console.error(result[1]);

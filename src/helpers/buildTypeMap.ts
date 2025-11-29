@@ -24,7 +24,7 @@ export const buildTypeMap = (
   options: EmitterOptions,
 ): TTypeMap => {
   // save original targeted namespaces array because it's mutated here
-  const targetedNamespaces = [...options["root-namespaces"]];
+  const targetedNamespaces = structuredClone(options["root-namespaces"]);
   const map: TTypeMap = [];
 
   const pushType = (t: Enum | Model | Union, hierarchy: string[]): void => {

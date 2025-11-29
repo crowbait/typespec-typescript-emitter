@@ -11,10 +11,16 @@ export default tsEslint.config(
       "**/.temp/**/*",
       "**/*.md",
       "**/node_modules/**/*",
-      "**/test/**/*.target.*",
+      "**/*.target.*",
     ],
     rules: {
       "@typescript-eslint/no-explicit-any": "off",
+    },
+  },
+  {
+    files: ["**/*.target.*"],
+    rules: {
+      "@typescript-eslint/no-unused-vars": "off",
     },
   },
 );

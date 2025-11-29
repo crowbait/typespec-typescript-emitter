@@ -13,11 +13,9 @@ namespace test {
   alias Timestamp = unixTimestamp32;
 
   model Resource {
-    @visibility(Lifecycle.Read)
     id_onlyRead: uint32,
     name: Name,
     metadata: {
-      @visibility
       created_onlyRead: Timestamp,
       user: uint32,
       username: string,
