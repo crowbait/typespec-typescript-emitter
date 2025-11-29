@@ -9,13 +9,6 @@ const files: Record<string, string> = {
   ),
 };
 
-// expectEmit(
-//   "route object",
-//   files,
-//   { "routes_test.ts": routesTarget },
-//   { "enable-routes": true },
-// );
-
 expectEmit(
   "route object",
   files,

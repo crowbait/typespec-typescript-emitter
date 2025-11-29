@@ -60,20 +60,21 @@ export const emitTypes = async (
         declaration += `enum ${t.type.name}`;
         break;
       case "Model":
-        declaration += `type ${t.type.name}<V extends Lifecycle = Lifecycle.All> =`;
+        declaration += `type ${t.type.name}${resolved.hasVisibility ? "<V extends Lifecycle = Lifecycle.All>" : ""} =`;
         // Making ALL types generic (regardless of whether they need it) improves ease-of-use,
         // both for the user as well for the dev when accessing known types.
         // declaration += `type ${t.type.name}${resolved.hasVisibility ? "<V extends Lifecycle = Lifecycle.All>" : ""} =`;
         break;
       case "Union":
-        declaration += `type ${t.type.name}<V extends Lifecycle = Lifecycle.All> =`;
+        declaration += `type ${t.type.name}${resolved.hasVisibility ? "<V extends Lifecycle = Lifecycle.All>" : ""} =`;
         // declaration += `type ${t.type.name}${resolved.hasVisibility ? "<V extends Lifecycle = Lifecycle.All>" : ""} =`;
         break;
     }
     if (resolved.doc) files[filename].addLine(`/** ${resolved.doc} */`);
 
-    if (resolved.hasVisibility)
+    if (resolved.hasVisibility) {
       imports[filename].lifecycleTypes.push("FilterLifecycle", "Lifecycle");
+    }
     if (
       (t.type as any).kind === "Model" &&
       t.type.name !== "Array" &&
@@ -99,11 +100,17 @@ export const emitTypes = async (
         typemap: typemap,
         accessor: "t",
       });
-      imports[filename].lifecycleTypes.push("Lifecycle");
       if (typeguard.resolved.value) {
-        files[filename].addLine(
-          `export function is${t.type.name}(t: any, vis: Lifecycle = Lifecycle.All): t is ${t.type.name}<typeof vis> {return (${typeguard.resolved})}`,
-        );
+        if (typeguard.hasVisibility) {
+          imports[filename].lifecycleTypes.push("Lifecycle");
+          files[filename].addLine(
+            `export function is${t.type.name}(t: any, vis: Lifecycle = Lifecycle.All): t is ${t.type.name}<typeof vis> {return (${typeguard.resolved})}`,
+          );
+        } else {
+          files[filename].addLine(
+            `export function is${t.type.name}(t: any): t is ${t.type.name} {return (${typeguard.resolved})}`,
+          );
+        }
         imports[filename].namespaces.push(...typeguard.imports);
       }
     }
@@ -122,11 +129,13 @@ export const emitTypes = async (
         (i) => filenameFromNamespaces(i) !== filename,
       ),
     );
-    importStrings.push(
-      `import {${[...new Set(imports[filename].lifecycleTypes)].join(", ")}} from './${visibilityHelperFileName}';`,
-    ); // unique-ify
+    if (imports[filename].lifecycleTypes.length > 0) {
+      importStrings.push(
+        `import {${[...new Set(imports[filename].lifecycleTypes)].join(", ")}} from './${visibilityHelperFileName}';`,
+      ); // unique-ify
+    }
 
-    const content = `/* eslint-disable */\n\n${autogenerateWarning}\n${importStrings.join("\n")}\n\n${filesArr[i][1].value}`;
+    const content = `/* eslint-disable */\n\n${autogenerateWarning}${importStrings.join("\n")}${importStrings.length > 0 ? "\n\n" : ""}${filesArr[i][1].value}`;
     await emitFile(program, {
       path: resolvePath(options["out-dir"], filename),
       content: content,

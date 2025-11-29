@@ -9,7 +9,6 @@
  */
 
 
-
 export const routes_test = {
   /** Retrieves an instance of the ressource */
   getResource: {

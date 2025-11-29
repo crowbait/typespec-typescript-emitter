@@ -6,7 +6,6 @@ const autogenerateWarning = `
  * Instead, change the underlying spec.
  */
 
-
 `;
 
 export default autogenerateWarning;
