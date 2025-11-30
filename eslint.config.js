@@ -3,16 +3,24 @@ import eslint from "@eslint/js";
 import tsEslint from "typescript-eslint";
 
 export default tsEslint.config(
+  eslint.configs.recommended,
+  ...tsEslint.configs.recommended,
   {
     ignores: [
       "**/dist/**/*",
       "**/.temp/**/*",
       "**/*.md",
       "**/node_modules/**/*",
-      "**/test/out/**/*",
-      "**/test/targets/**/*",
+      "**/*.target.*",
     ],
+    rules: {
+      "@typescript-eslint/no-explicit-any": "off",
+    },
   },
-  eslint.configs.recommended,
-  ...tsEslint.configs.recommended,
+  {
+    files: ["**/*.target.*"],
+    rules: {
+      "@typescript-eslint/no-unused-vars": "off",
+    },
+  },
 );
