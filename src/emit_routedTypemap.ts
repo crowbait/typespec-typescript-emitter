@@ -62,7 +62,6 @@ export const emitRoutedTypemap = async (
   // resolving operations
   for (const ns of Object.entries(foundOps)) {
     for (const op of ns[1]) {
-      console.log(ns[0], op.name);
       const resolved = await resolveOperationTypemap(
         program,
         options,
