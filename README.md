@@ -26,6 +26,7 @@ It can the following things:
 - [Emitter: Routed Typemap](#emitter-routed-typemap)
 - [Contributing](#contributing)
   - [Short Overview](#short-overview)
+  - [Todo](#todo)
 
 ## Installation
 
@@ -463,3 +464,20 @@ The primary flow of type resolution is quite simple:
 
 Most of these methods do not return data, because they mutate an "output" object passed as a parameter. This has proven to be much more concise than passing return values up and down the chain.
 Also to be considered is the `hasVisibility` flag showing up at many points. This is used to ultimately determine whether a type needs lifecycle visibility handling in any way (because if any part of it does, so does the whole thing).
+
+### Todo
+
+There are some things left to do, most of which I hoped to get ready for 2.0.0, however, that didn't work out.
+My free time is too limited to get these things done without holding back the much needed fixes in 2.0.0 .
+They will either be done when time permits or, perhaps, you might want to tackle some of this?
+
+- [ ] additional tests (the current testing setup is by no means exhaustive)
+  - [ ] `extends` on models, including `is` and spread notation
+  - [ ] imports from other files; are naming collisions still possible?
+  - [ ] thorough tests on imports and reuses for all emitted type kinds (model, union, enum, scalar)
+- [ ] support for generics
+- [ ] (with new option) typeguards referenced in / accessible from routes object
+- [ ] each file could export its "child" namespaces (from their respective files) via `export * from "rootNS.someNS.subNS.ts" as subNS;`, effectively making everything accessible by simply typing `rootNS.someNS.subNS.MyType`
+  - this will collide with imports from other files; these conflicts must be avoided when this option is set
+  - one dedicated file as "root" exports all specified root namespaces
+  - the `typemap` object can be used to generate lists of all namespaces within each namespace, using array reduction
