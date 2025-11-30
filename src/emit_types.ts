@@ -84,12 +84,13 @@ export const emitTypes = async (
       t.type.name !== "Record" &&
       resolved.visibilityMap.replaceAll("{", "").replaceAll("}", "").trim()
     ) {
-      files[filename].addLine(
-        `${declaration} FilterLifecycle<${resolved.resolved.value}, typeof ${t.type.name}_VisMap, V>`,
-      );
-      files[filename].addLine(
-        `export const ${t.type.name}_VisMap = ${resolved.visibilityMap} as const`,
-      );
+      files[filename].addLine(`${declaration} ${resolved.resolved.value}`);
+      // files[filename].addLine(
+      //   `${declaration} FilterLifecycle<${resolved.resolved.value}, typeof ${t.type.name}_VisMap, V>`,
+      // );
+      // files[filename].addLine(
+      //   `export const ${t.type.name}_VisMap = ${resolved.visibilityMap} as const`,
+      // );
     } else {
       files[filename].addLine(`${declaration} ${resolved.resolved.value}`);
     }

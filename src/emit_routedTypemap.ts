@@ -25,16 +25,17 @@ export const emitRoutedTypemap = async (
 ): Promise<void> => {
   // save original targeted namespaces array because it's mutated here
   const targetedNamespaces = structuredClone(options["root-namespaces"]);
-
-  let hasVisibilityGlobal = false;
   const namespaceImports: {
     [namespace: string]: TTypeMap[number]["namespaces"][];
   } = {};
   const namespaceOps: {
     [namespace: string]: {
-      [path: string]: {
-        [verb: string]: TOperationTypemap;
+      ops: {
+        [path: string]: {
+          [verb: string]: TOperationTypemap;
+        };
       };
+      hasVisibility: boolean;
     };
   } = {};
 
@@ -61,6 +62,7 @@ export const emitRoutedTypemap = async (
   // resolving operations
   for (const ns of Object.entries(foundOps)) {
     for (const op of ns[1]) {
+      console.log(ns[0], op.name);
       const resolved = await resolveOperationTypemap(
         program,
         options,
@@ -69,34 +71,36 @@ export const emitRoutedTypemap = async (
       );
       const httpOp = getHttpOperation(program, op)[0];
 
+      if (!namespaceImports[ns[0]]) namespaceImports[ns[0]] = [];
+      namespaceImports[ns[0]].push(...resolved.imports);
+
+      if (!namespaceOps[ns[0]])
+        namespaceOps[ns[0]] = { ops: {}, hasVisibility: false };
+      if (!namespaceOps[ns[0]].ops[httpOp.path])
+        namespaceOps[ns[0]].ops[httpOp.path] = {};
+      namespaceOps[ns[0]].ops[httpOp.path][httpOp.verb.toUpperCase()] =
+        resolved.types;
+
       if (
         resolved.types.request.hasVisibility ||
         resolved.types.response.content.some((v) => v.hasVisibility)
       )
-        hasVisibilityGlobal = true;
-
-      if (!namespaceImports[ns[0]]) namespaceImports[ns[0]] = [];
-      namespaceImports[ns[0]].push(...resolved.imports);
-
-      if (!namespaceOps[ns[0]]) namespaceOps[ns[0]] = {};
-      if (!namespaceOps[ns[0]][httpOp.path])
-        namespaceOps[ns[0]][httpOp.path] = {};
-      namespaceOps[ns[0]][httpOp.path][httpOp.verb.toUpperCase()] =
-        resolved.types;
+        namespaceOps[ns[0]].hasVisibility = true;
     }
   }
 
   // emitting
   for (const ns of Object.entries(namespaceOps)) {
     const importStrings = getImports(unique2D(namespaceImports[ns[0]]));
-    if (hasVisibilityGlobal) {
+
+    if (ns[1].hasVisibility) {
       importStrings.push(
         `import {Lifecycle, FilterLifecycle} from './${visibilityHelperFileName}';`,
       );
     }
 
-    let out = `export type types_${ns[0]}${hasVisibilityGlobal ? "<V extends Lifecycle = Lifecycle.All>" : ""} = {\n`;
-    out += Object.entries(ns[1])
+    let out = `export type types_${ns[0]}${ns[1].hasVisibility ? "<V extends Lifecycle = Lifecycle.All>" : ""} = {\n`;
+    out += Object.entries(ns[1].ops)
       .map((path) => {
         let pathret = `  ['${path[0]}']: {\n`;
         pathret += Object.entries(path[1])

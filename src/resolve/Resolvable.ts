@@ -130,7 +130,9 @@ export abstract class Resolvable<T extends Type> {
     out: ResolverResult<Resolver>,
   ): Promise<void> {
     this.validate();
-    if (await this.hasVisibility(opts, out)) out.hasVisibility = true;
+
+    const ownVisibility = await this.hasVisibility(opts, out);
+    if (ownVisibility) out.hasVisibility = true;
 
     // check for known resolved type
     if (opts.rootTypeReady && (this._t as any).name) {
@@ -167,7 +169,7 @@ export abstract class Resolvable<T extends Type> {
               ? foundKnownResolved.type.name
               : this._t.kind === "Enum"
                 ? "true" // enums don't have typeguards
-                : `is${foundKnownResolved.type.name}(${(opts as ResolverOptions<Resolver.Typeguard>).accessor})`,
+                : `is${foundKnownResolved.type.name}(${(opts as ResolverOptions<Resolver.Typeguard>).accessor}${ownVisibility ? ", vis" : ""})`,
           );
         } else {
           // found is in different file than current, prepare importing
@@ -177,7 +179,7 @@ export abstract class Resolvable<T extends Type> {
                 ? foundKnownResolved.type.name
                 : this._t.kind === "Enum"
                   ? "true" // enums don't have typeguards
-                  : `is${foundKnownResolved.type.name}(${(opts as ResolverOptions<Resolver.Typeguard>).accessor}, vis)`
+                  : `is${foundKnownResolved.type.name}(${(opts as ResolverOptions<Resolver.Typeguard>).accessor}${ownVisibility ? ", vis" : ""})`
             }`,
           );
           out.imports.push(foundKnownResolved.namespaces);
