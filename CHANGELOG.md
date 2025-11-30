@@ -1,4 +1,8 @@
-# [1.3.0](https://github.com/crowbait/typespec-typescript-emitter/compare/v1.2.0...v1.3.0) (2025-11-30)
+## [2.0.1](https://github.com/crowbait/typespec-typescript-emitter/compare/v1.3.0...v2.0.1) (2025-11-30)
+
+
+
+# [1.3.0](https://github.com/crowbait/typespec-typescript-emitter/compare/v2.0.0...v1.3.0) (2025-11-30)
 
 
 ### Bug Fixes
@@ -33,22 +37,6 @@
 
 
 ## [1.1.2](https://github.com/crowbait/typespec-typescript-emitter/compare/v1.1.1...v1.1.2) (2025-11-17)
-
-
-
-## [1.1.1](https://github.com/crowbait/typespec-typescript-emitter/compare/v1.1.0...v1.1.1) (2025-09-26)
-
-
-### Bug Fixes
-
-* routed typemap respects visibility modifiers ([13c0a45](https://github.com/crowbait/typespec-typescript-emitter/commit/13c0a45f38b949a36ad2e8b6c40a1829ff3b54da))
-* routed-typemap handling of multiple verbs on same path ([f33e6d9](https://github.com/crowbait/typespec-typescript-emitter/commit/f33e6d94d78523206813ab4191feee29cb6c3b2e))
-* routes / routed typemap emitters now resolve ops inside interfaces ([21504bc](https://github.com/crowbait/typespec-typescript-emitter/commit/21504bc74cc4f77aeac1f1bcb4e52a42917d9146))
-* thorough resolution of nested types in typemap ([95af299](https://github.com/crowbait/typespec-typescript-emitter/commit/95af299b662dbcba0d21b56aa8ebe2f91c6e6e92))
-
-
-
-# [1.1.0](https://github.com/crowbait/typespec-typescript-emitter/compare/v1.0.0...v1.1.0) (2025-05-23)
 
 
 
