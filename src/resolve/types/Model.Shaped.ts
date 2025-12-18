@@ -109,6 +109,7 @@ export class ShapedModel extends Resolvable<Model> {
         this._t.baseModel,
         opts,
         out,
+        undefined,
       );
       out.imports.push(...resolvedBase.imports);
       resolution.append(`${resolvedBase.resolved} & `);
@@ -133,7 +134,10 @@ export class ShapedModel extends Resolvable<Model> {
           if (doc) resolution.addLine(`/** ${doc} */`, opts.nestlevel + 1);
         }
         // resolve prop
-        const resolved = await this.resolveNested(prop.type, opts, out);
+        const resolved = await this.resolveNested(prop.type, opts, out, [
+          this._t.name,
+          prop.name,
+        ]);
         resolution.addLine(
           `${prop.name}${prop.optional ? "?" : ""}: ${resolved.resolved}${i + 1 < this._t.properties.size ? "," : ""}`,
           opts.nestlevel + 1,
@@ -216,6 +220,7 @@ export class ShapedModel extends Resolvable<Model> {
         this._t.baseModel,
         opts,
         out,
+        undefined,
       );
       out.resolved.append(
         `${"  ".repeat(opts.nestlevel)}${resolvedBase.resolved} &&`,
@@ -230,7 +235,10 @@ export class ShapedModel extends Resolvable<Model> {
     for (const prop of props) {
       const oldAccessor = opts.accessor;
       opts.accessor = `${opts.accessor}['${prop.name}']`;
-      const resolved = await this.resolveNested(prop.type, opts, out);
+      const resolved = await this.resolveNested(prop.type, opts, out, [
+        this._t.name,
+        prop.name,
+      ]);
       opts.accessor = oldAccessor;
       out.imports.push(...resolved.imports);
 

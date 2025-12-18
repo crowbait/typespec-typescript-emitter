@@ -13,11 +13,12 @@ export interface EmitterOptions {
   "enable-routed-typemap": boolean;
   "string-nominal-enums": boolean;
   "serializable-date-types": boolean;
+  "type-mappings": Record<string, string>;
+  "typeguard-mappings": Record<string, string>;
 }
 
 const EmitterOptionsSchema: JSONSchemaType<EmitterOptions> = {
   type: "object",
-  additionalProperties: false,
   properties: {
     "root-namespaces": { type: "array", items: { type: "string" } },
     "out-dir": { type: "string", format: "absolute-path" },
@@ -27,8 +28,19 @@ const EmitterOptionsSchema: JSONSchemaType<EmitterOptions> = {
     "enable-routed-typemap": { type: "boolean" },
     "string-nominal-enums": { type: "boolean" },
     "serializable-date-types": { type: "boolean" },
+    "type-mappings": {
+      type: "object",
+      required: [],
+      additionalProperties: { type: "string" },
+    },
+    "typeguard-mappings": {
+      type: "object",
+      required: [],
+      additionalProperties: { type: "string" },
+    },
   },
   required: ["root-namespaces"],
+  additionalProperties: false,
 };
 
 /** Maps option to its default value and options that must be set to `true` for this one to work */
@@ -46,6 +58,9 @@ export const optionDependencies = (
 
   ["enable-typeguards"]: [false, ["enable-types"]],
   ["enable-routed-typemap"]: [false, ["enable-types"]],
+
+  ["type-mappings"]: [{}, []],
+  ["typeguard-mappings"]: [{}, []],
 });
 
 export const $lib = createTypeSpecLibrary({

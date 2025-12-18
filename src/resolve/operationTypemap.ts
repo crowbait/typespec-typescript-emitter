@@ -49,6 +49,7 @@ export const resolveOperationTypemap = async (
         rootType: null,
         typemap,
         rootTypeReady: true,
+        ancestryPath: [],
       },
     );
     ret.imports.push(...resolved.imports);
@@ -106,6 +107,7 @@ export const resolveOperationTypemap = async (
                     rootType: null,
                     typemap,
                     rootTypeReady: true,
+                    ancestryPath: [],
                   },
                 );
                 if (resolved.hasVisibility) modelret.hasVisibility = true;
@@ -129,6 +131,7 @@ export const resolveOperationTypemap = async (
               rootType: null,
               typemap,
               rootTypeReady: true,
+              ancestryPath: [],
             });
             if (resolved.hasVisibility) modelret.hasVisibility = true;
             ret.imports.push(...resolved.imports);
@@ -163,6 +166,7 @@ export const resolveOperationTypemap = async (
             rootType: null,
             typemap,
             rootTypeReady: true,
+            ancestryPath: [],
           });
           ret.imports.push(...resolved.imports);
           responseRet.content.push({

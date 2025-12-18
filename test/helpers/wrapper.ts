@@ -15,6 +15,8 @@ export const defaultConfig: Omit<EmitterOptions, "out-dir"> = {
   "enable-routed-typemap": false,
   "string-nominal-enums": true,
   "serializable-date-types": true,
+  "type-mappings": {},
+  "typeguard-mappings": {},
 };
 
 type Filename = string;
@@ -125,6 +127,7 @@ export const expectResolution = (
       rootType: null,
       typemap: [],
       emitDocs: false,
+      ancestryPath: [],
     });
     // check if valid typescript
     if (args.typescriptTransformer !== null) {

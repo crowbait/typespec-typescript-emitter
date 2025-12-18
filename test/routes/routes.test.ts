@@ -16,7 +16,7 @@ expectEmit(
     "routes_test.ts": `/* eslint-disable */${readFileSync(
       join(__dirname, "routes.target.ts"),
       "utf8",
-    )}`,
+    ).replaceAll("\r\n", "\n")}`,
   },
   { "enable-routes": true },
 );

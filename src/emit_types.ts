@@ -51,6 +51,7 @@ export const emitTypes = async (
       nestlevel: 0,
       rootType: t,
       typemap: typemap,
+      ancestryPath: [...t.namespaces, t.type.name],
     });
 
     imports[filename].namespaces.push(...resolved.imports);
@@ -103,6 +104,7 @@ export const emitTypes = async (
         rootType: t,
         typemap: typemap,
         accessor: "t",
+        ancestryPath: [...t.namespaces, t.type.name],
       });
       if (typeguard.resolved.value) {
         if (typeguard.hasVisibility) {

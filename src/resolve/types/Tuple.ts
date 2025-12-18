@@ -26,7 +26,7 @@ export class ResolvableTuple extends Resolvable<Tuple> {
   ): Promise<void> {
     const results: string[] = [];
     for (const v of this._t.values) {
-      const resolved = await this.resolveNested(v, opts, out);
+      const resolved = await this.resolveNested(v, opts, out, undefined);
       out.imports.push(...resolved.imports);
       results.push(resolved.resolved.value);
     }
@@ -42,7 +42,7 @@ export class ResolvableTuple extends Resolvable<Tuple> {
     let i = 0;
     for (const v of this._t.values) {
       opts.accessor = `${opts.accessor}[${i}]`;
-      const resolved = await this.resolveNested(v, opts, out);
+      const resolved = await this.resolveNested(v, opts, out, undefined);
       opts.accessor = oldAccessor;
       out.imports.push(...resolved.imports);
       results.push(resolved.resolved.value);

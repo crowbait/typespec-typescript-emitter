@@ -30,7 +30,13 @@ export class ResolvableUnion extends Resolvable<Union> {
     }
     const results: string[] = [];
     for (const v of Array.from(this._t.variants)) {
-      const resolved = await this.resolveNested(v[1].type, opts, out, false);
+      const resolved = await this.resolveNested(
+        v[1].type,
+        opts,
+        out,
+        this._t.name,
+        false,
+      );
       out.imports.push(...resolved.imports);
       results.push(resolved.resolved.value);
     }
@@ -43,7 +49,12 @@ export class ResolvableUnion extends Resolvable<Union> {
   ): Promise<void> {
     const results: string[] = [];
     for (const v of Array.from(this._t.variants)) {
-      const resolved = await this.resolveNested(v[1].type, opts, out);
+      const resolved = await this.resolveNested(
+        v[1].type,
+        opts,
+        out,
+        this._t.name,
+      );
       out.imports.push(...resolved.imports);
       results.push(`(${resolved.resolved.value})`);
     }
