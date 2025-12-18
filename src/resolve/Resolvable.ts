@@ -36,18 +36,27 @@ export abstract class Resolvable<T extends Type> {
     t: Type,
     opts: ResolverOptions<R>,
     out: ResolverResult<R>,
+    /** The name that should be added to the ancestry path. */
+    ancestryName: string | string[] | undefined,
+    /** Increases nestlevel, used for indentation formatting */
     nest: boolean = true,
   ): Promise<ResolverResult<R>> {
     // prepare nested resolution
     if (nest) opts.nestlevel++;
     if (!opts.parents) opts.parents = [];
     opts.parents.push(this._t);
+    opts.ancestryPath.push(
+      ...(Array.isArray(ancestryName) ? ancestryName : [ancestryName]),
+    );
 
     const ret = await Resolvable.resolve(this._r, t, opts);
 
     // revert to current level
     if (nest) opts.nestlevel--;
     opts.parents.pop();
+    opts.ancestryPath.splice(
+      -(Array.isArray(ancestryName) ? ancestryName.length : 1),
+    );
 
     return ret;
   }
@@ -142,9 +151,6 @@ export abstract class Resolvable<T extends Type> {
       );
       // find known resolved type
       const foundKnownResolved = ((): TTypeMap[number] | null => {
-        const currentNamespaces = namespaceListFromNamespace(
-          (this._t as any).namespace,
-        );
         if (currentNamespaces && currentNamespaces.length > 0) {
           const found = opts.typemap.find(
             (mt) =>
@@ -186,14 +192,53 @@ export abstract class Resolvable<T extends Type> {
         }
 
         // optionally allow found type to modify output
-        if (this.transformKnownType !== undefined)
-          this.transformKnownType(opts, out);
+        this.transformKnownType(opts, out);
         return;
       }
     }
 
     // this prevents the root type from triggering known resolution
     opts.rootTypeReady = true;
+
+    // check if type is overridden by user in config
+    if (opts.options["type-mappings"] || opts.options["typeguard-mappings"]) {
+      const overridesTypes = Object.entries(
+        opts.options["type-mappings"] ?? {},
+      );
+      const overridesTypeguards = Object.entries(
+        opts.options["typeguard-mappings"] ?? {},
+      );
+
+      /** Maps [path, value] -> [pathSegmentsReversed[], value] */
+      const mapOverrides = (str: [string, string]): [string[], string] =>
+        [str[0].split("/").reverse(), str[1]] as [string[], string];
+      const overridesTypes_mapped = overridesTypes.map(mapOverrides);
+      const overridesTypeguards_mapped = overridesTypeguards.map(mapOverrides);
+      const ancestry = [...opts.ancestryPath].reverse();
+
+      const findOverride = (o: [string[], string]) =>
+        o[0].every((seg, i) => ancestry[i] === seg);
+      const typeOverride = overridesTypes_mapped.find(findOverride);
+      const typeguardOverride = overridesTypeguards_mapped.find(findOverride);
+
+      if (this._r === Resolver.Type && typeOverride !== undefined)
+        out.resolved.append(typeOverride[1]);
+      if (this._r === Resolver.Typeguard && typeguardOverride !== undefined)
+        out.resolved.append(typeguardOverride[1]);
+      if (
+        this._r === Resolver.Typeguard &&
+        typeOverride !== undefined &&
+        typeguardOverride === undefined
+      ) {
+        this.diagnostic(
+          "missing-typeguard-override",
+          `Type at path ${opts.ancestryPath.join(".")} has type override, but no typeguard override. Defaulting to "true".`,
+          "warning",
+        );
+        out.resolved.append("true");
+      }
+      if (typeOverride !== undefined || typeguardOverride !== undefined) return;
+    }
 
     switch (this._r) {
       case Resolver.Type:
@@ -209,6 +254,7 @@ export abstract class Resolvable<T extends Type> {
     }
   }
 
+  /** Adds visibility maps to known types, if needed (only applies to shaped model). */
   protected transformKnownType(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     opts: ResolverOptions<Resolver>,

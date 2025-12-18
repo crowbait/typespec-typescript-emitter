@@ -36,7 +36,8 @@ export class ResolvableScalar extends Resolvable<Scalar> {
       }
     } else if (this._t.baseScalar) {
       out.resolved.append(
-        (await this.resolveNested(this._t.baseScalar, opts, out)).resolved,
+        (await this.resolveNested(this._t.baseScalar, opts, out, this._t.name))
+          .resolved,
       );
     } else {
       switch (this._t.name) {
@@ -99,7 +100,8 @@ export class ResolvableScalar extends Resolvable<Scalar> {
       }
     } else if (this._t.baseScalar) {
       out.resolved.append(
-        (await this.resolveNested(this._t.baseScalar, opts, out)).resolved,
+        (await this.resolveNested(this._t.baseScalar, opts, out, this._t.name))
+          .resolved,
       );
     } else if (this._t.name === "bytes") {
       out.resolved.append(`${opts.accessor} instanceof Uint8Array`);

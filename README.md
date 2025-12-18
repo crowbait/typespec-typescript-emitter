@@ -22,6 +22,7 @@ It can the following things:
     - [In Types](#in-types)
     - [In Typeguards](#in-typeguards)
   - [Nominal Enums](#nominal-enums)
+  - [Overriding Types \& Typeguards](#overriding-types--typeguards)
 - [Emitter: Routes](#emitter-routes)
 - [Emitter: Routed Typemap](#emitter-routed-typemap)
 - [Contributing](#contributing)
@@ -65,6 +66,8 @@ The following options are available:
 - `enable-routed-typemap` (default: false, **requires** `enable-types`): enables output of an [indexable type](#emitter-routed-typemap), mapping paths and HTTP verbs to request and response bodies.
 - `string-nominal-enums` (default: false): outputs member names as strings instead of index values for enum members declared without explicit values.
 - `serializable-date-types` (default: false): outputs serializable types for typespec's dates types that match OpenApi spec. Types like `offsetDateTime`, `plainDate` and `utcDateTime` will be emitted as `string` and `unixTimestamp32` as `number`. If disabled, all these types resolve to `Date`.
+- `type-mappings` (default: undefined): see [Overriding Types \& Typeguards](#overriding-types--typeguards)
+- `typeguard-mappings` (default: undefined): see [Overriding Types \& Typeguards](#overriding-types--typeguards)
 
 ## Emitter: Types
 
@@ -288,6 +291,35 @@ export enum Status {
   STATUS_2 = 'STATUS_2'
 }
 ```
+
+### Overriding Types & Typeguards
+
+Using the configuration options `type-mappings` and `typeguard-mappings`, you can override the type(guard) resolution for specific types.
+You specify a "path" of any length, ending in the **type** or **model property** to be overridden. This "path" can consist of namespaces, models and model properties:
+
+```yml
+type-mappings:
+  "myModel/overriddenProperty": "number"
+  "myNamespace/myModel/overriddenProperty": "string"
+  "Overridden": "'stringLiteral'"
+  "myNamespace/OverriddenModel": "{a: string}"
+typeguard-mappings:
+  "Overridden": "typeof t === 'string'"
+  "myNamespace/OverriddenModel": "t['a'] !== undefined && typeof t['a'] === 'string'"
+```
+
+This example config does the following:
+
+- any property `overriddenProperty` on any model `myModel` will resolve to `number`
+- any property `overriddenProperty` on any model `myModel` that is an immediate child of `myNamespace` will resolve to `string`
+- any type named `Overridden` will resolve to `'stringLiteral'`
+  - its typeguard resolves to `typeof t === 'string'`
+- any type named `OverriddenModel` that is an immediate child of `myNamespace` will resolve to `{a: string}`
+  - its typeguard resolves to `t['a'] !== undefined && typeof t['a'] === 'string'`
+
+You can use `t` in typeguards to access the variable currently being tested. Overridden types without overridden typeguards will default to `true` (which does not break `!== undefined` for non-optional model properties).
+
+You *can* specified the name of a known type as the resolution target, because your specified value is emitted verbatim instead of the default resolution. *However*, there is no import resolution being performed, so if you specify the name of another type, that other type *has* to be in the same namespace so that it ends up in the same typescript file.
 
 ## Emitter: Routes
 

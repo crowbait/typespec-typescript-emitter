@@ -47,6 +47,7 @@ export class IndexedModel extends Resolvable<Model> {
       this._t.indexer!.value,
       opts,
       out,
+      this._t.name,
       false,
     );
     switch (this._indexedModelKind) {
@@ -70,6 +71,7 @@ export class IndexedModel extends Resolvable<Model> {
       this._t.indexer!.value,
       opts,
       out,
+      this._t.name,
     );
     opts.accessor = oldAccessor;
     if (resolved.resolved.value.endsWith("\n")) resolved.resolved.dropLast();

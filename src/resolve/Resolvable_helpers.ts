@@ -14,6 +14,7 @@ export type ResolverOptions<R extends Resolver> = {
   program: Program;
   options: EmitterOptions;
   typemap: TTypeMap;
+  /** Used for indentation formatting */
   nestlevel: number;
   /** The type the entire resolution chain started with. */
   rootType: TTypeMap[number] | null;
@@ -24,6 +25,8 @@ export type ResolverOptions<R extends Resolver> = {
   rootTypeReady?: boolean;
   /** The types "up the chain" - "parent" types on nested resolution. */
   parents?: Type[];
+  /** The entire "name chain", from the root namespace to here - "things" without a name are `undefined`. */
+  ancestryPath: (string | undefined)[];
 } & (R extends Resolver.Type
   ? {
       emitDocs: boolean;

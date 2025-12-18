@@ -4,14 +4,10 @@ import { expectEmit } from "../helpers/wrapper";
 
 const prepareContents = (s: string): string => {
   let ret = s;
-  ret = ret.replaceAll(
-    "// WARN this file may be broken by auto formatting.",
-    "",
-  );
-  ret = ret.replaceAll(
-    "// WARN by default in vscode, save: Ctrl+K , Ctrl+Shift+S",
-    "",
-  );
+  ret = ret
+    .replaceAll("// WARN this file may be broken by auto formatting.", "")
+    .replaceAll("// WARN by default in vscode, save: Ctrl+K , Ctrl+Shift+S", "")
+    .replaceAll("\r\n", "\n");
   return `/* eslint-disable */${ret}`;
 };
 
