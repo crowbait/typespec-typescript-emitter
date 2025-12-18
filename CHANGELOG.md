@@ -1,3 +1,12 @@
+# [2.1.0](https://github.com/crowbait/typespec-typescript-emitter/compare/v2.0.1...v2.1.0) (2025-12-18)
+
+
+### Features
+
+* overridable types + typeguards, closes [#15](https://github.com/crowbait/typespec-typescript-emitter/issues/15) ([71a6fef](https://github.com/crowbait/typespec-typescript-emitter/commit/71a6fef82569a4d378e1ba3c4e9dd94a2e6ccc80))
+
+
+
 ## [2.0.1](https://github.com/crowbait/typespec-typescript-emitter/compare/v1.3.0...v2.0.1) (2025-11-30)
 
 
@@ -33,10 +42,6 @@
 
 * serializable-date-types ([ba4775d](https://github.com/crowbait/typespec-typescript-emitter/commit/ba4775d2292dcec4436470b19e9c1aea3b9b3e70))
 * string-nominal-enums ([a0b572c](https://github.com/crowbait/typespec-typescript-emitter/commit/a0b572c2f19baa5d100663458f2ea1ad182b4323))
-
-
-
-## [1.1.2](https://github.com/crowbait/typespec-typescript-emitter/compare/v1.1.1...v1.1.2) (2025-11-17)
 
 
 
