@@ -1,3 +1,12 @@
+# [2.2.0](https://github.com/crowbait/typespec-typescript-emitter/compare/v2.1.0...v2.2.0) (2026-01-14)
+
+
+### Features
+
+* option to enabled/disable .ts file extensions on import statements ([c6a423e](https://github.com/crowbait/typespec-typescript-emitter/commit/c6a423e73139a35b36f8c413431f408a09dd9d89))
+
+
+
 # [2.1.0](https://github.com/crowbait/typespec-typescript-emitter/compare/v2.0.1...v2.1.0) (2025-12-18)
 
 
@@ -32,16 +41,6 @@
 * declared scalars (`scalar X extends string`) are now resolved and emitted as well ([224ac68](https://github.com/crowbait/typespec-typescript-emitter/commit/224ac68e66a3984facc45fb5fce92f5a01472a89))
 * support `extends` on models ([dfb8f8b](https://github.com/crowbait/typespec-typescript-emitter/commit/dfb8f8b34752b851f4e5f12ce83a3e3120e0209a))
 * visibility system ([adb28ab](https://github.com/crowbait/typespec-typescript-emitter/commit/adb28abdeb87ae99622302126633381a477c8247)), closes [#12](https://github.com/crowbait/typespec-typescript-emitter/issues/12) [#7](https://github.com/crowbait/typespec-typescript-emitter/issues/7)
-
-
-
-# [1.2.0](https://github.com/crowbait/typespec-typescript-emitter/compare/v1.1.2...v1.2.0) (2025-11-18)
-
-
-### Features
-
-* serializable-date-types ([ba4775d](https://github.com/crowbait/typespec-typescript-emitter/commit/ba4775d2292dcec4436470b19e9c1aea3b9b3e70))
-* string-nominal-enums ([a0b572c](https://github.com/crowbait/typespec-typescript-emitter/commit/a0b572c2f19baa5d100663458f2ea1ad182b4323))
 
 
 
