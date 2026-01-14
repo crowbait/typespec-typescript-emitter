@@ -50,14 +50,15 @@ export type FilterLifecycle<
 }
 `;
 
-export const visibilityHelperFileName = "lifecycleVisibility.ts";
+export const visibilityHelperFileName = (includeExtension: boolean) =>
+  `lifecycleVisibility${includeExtension ? ".ts" : ""}`;
 
 export const emitVisibilityHelperFile = async (
   program: Program,
   options: EmitterOptions,
 ): Promise<void> => {
   await emitFile(program, {
-    path: resolvePath(options["out-dir"], visibilityHelperFileName),
+    path: resolvePath(options["out-dir"], visibilityHelperFileName(true)),
     content: visibilityHelperFile,
   });
 };

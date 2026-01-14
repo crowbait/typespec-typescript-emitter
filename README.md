@@ -68,6 +68,7 @@ The following options are available:
 - `serializable-date-types` (default: false): outputs serializable types for typespec's dates types that match OpenApi spec. Types like `offsetDateTime`, `plainDate` and `utcDateTime` will be emitted as `string` and `unixTimestamp32` as `number`. If disabled, all these types resolve to `Date`.
 - `type-mappings` (default: undefined): see [Overriding Types \& Typeguards](#overriding-types--typeguards)
 - `typeguard-mappings` (default: undefined): see [Overriding Types \& Typeguards](#overriding-types--typeguards)
+- `import-file-extensions` (default: false): if true, import statements get the `.ts` extension, otherwise, the file extension is omitted for import statements.
 
 ## Emitter: Types
 

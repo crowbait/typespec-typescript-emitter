@@ -90,11 +90,14 @@ export const emitRoutedTypemap = async (
 
   // emitting
   for (const ns of Object.entries(namespaceOps)) {
-    const importStrings = getImports(unique2D(namespaceImports[ns[0]]));
+    const importStrings = getImports(
+      unique2D(namespaceImports[ns[0]]),
+      options["import-file-extensions"],
+    );
 
     if (ns[1].hasVisibility) {
       importStrings.push(
-        `import {Lifecycle, FilterLifecycle} from './${visibilityHelperFileName}';`,
+        `import {Lifecycle, FilterLifecycle} from './${visibilityHelperFileName(options["import-file-extensions"])}';`,
       );
     }
 

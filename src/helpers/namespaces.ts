@@ -14,5 +14,7 @@ export const namespaceListFromNamespace = (
   return ret;
 };
 
-export const filenameFromNamespaces = (ns: string[]): string =>
-  `${ns.join(".")}.ts`;
+export const filenameFromNamespaces = (
+  ns: string[],
+  includeExtension: boolean,
+): string => `${ns.join(".")}${includeExtension ? ".ts" : ""}`;

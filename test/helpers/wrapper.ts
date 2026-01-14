@@ -17,6 +17,7 @@ export const defaultConfig: Omit<EmitterOptions, "out-dir"> = {
   "serializable-date-types": true,
   "type-mappings": {},
   "typeguard-mappings": {},
+  "import-file-extensions": true,
 };
 
 type Filename = string;

@@ -28,8 +28,8 @@ export const emitTypes = async (
 
   // generate files
   typemap.forEach((t) => {
-    files[filenameFromNamespaces(t.namespaces)] = new AppendableString();
-    imports[filenameFromNamespaces(t.namespaces)] = {
+    files[filenameFromNamespaces(t.namespaces, true)] = new AppendableString();
+    imports[filenameFromNamespaces(t.namespaces, true)] = {
       namespaces: [],
       lifecycleTypes: [],
     };
@@ -43,7 +43,7 @@ export const emitTypes = async (
   // resolve all types
   for (let i = 0; i < typemap.length; i++) {
     const t = typemap[i];
-    const filename = filenameFromNamespaces(t.namespaces);
+    const filename = filenameFromNamespaces(t.namespaces, true);
     const resolved = await Resolvable.resolve(Resolver.Type, t.type, {
       program,
       options,
@@ -132,12 +132,15 @@ export const emitTypes = async (
     imports[filename].namespaces = unique2D(imports[filename].namespaces);
     const importStrings = getImports(
       imports[filename].namespaces.filter(
-        (i) => filenameFromNamespaces(i) !== filename,
+        (i) =>
+          filenameFromNamespaces(i, options["import-file-extensions"]) !==
+          filename,
       ),
+      options["import-file-extensions"],
     );
     if (imports[filename].lifecycleTypes.length > 0) {
       importStrings.push(
-        `import {${[...new Set(imports[filename].lifecycleTypes)].join(", ")}} from './${visibilityHelperFileName}';`,
+        `import {${[...new Set(imports[filename].lifecycleTypes)].join(", ")}} from './${visibilityHelperFileName(options["import-file-extensions"])}';`,
       ); // unique-ify
     }
 

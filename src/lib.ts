@@ -15,6 +15,7 @@ export interface EmitterOptions {
   "serializable-date-types": boolean;
   "type-mappings": Record<string, string>;
   "typeguard-mappings": Record<string, string>;
+  "import-file-extensions": boolean;
 }
 
 const EmitterOptionsSchema: JSONSchemaType<EmitterOptions> = {
@@ -38,6 +39,7 @@ const EmitterOptionsSchema: JSONSchemaType<EmitterOptions> = {
       required: [],
       additionalProperties: { type: "string" },
     },
+    "import-file-extensions": { type: "boolean" },
   },
   required: ["root-namespaces"],
   additionalProperties: false,
@@ -61,6 +63,8 @@ export const optionDependencies = (
 
   ["type-mappings"]: [{}, []],
   ["typeguard-mappings"]: [{}, []],
+
+  ["import-file-extensions"]: [false, []],
 });
 
 export const $lib = createTypeSpecLibrary({
