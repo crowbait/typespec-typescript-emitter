@@ -1,4 +1,4 @@
-import { Operation, Program, Type } from "@typespec/compiler";
+import { getDoc, Operation, Program, Type } from "@typespec/compiler";
 import { getHttpOperation } from "@typespec/http";
 import { AppendableString } from "../helpers/appendableString.js";
 import { TTypeMap } from "../helpers/buildTypeMap.js";
@@ -8,6 +8,7 @@ import { Resolver } from "./Resolvable_helpers.js";
 
 /** Maps a route path to its typemap definition and required imports */
 export type TOperationTypemap = {
+  doc: string | undefined;
   // "string" in these does not simply refer to the type "string"; it's the typescript code *as* string.
   parameters: { content: string | null; hasVisibility: boolean };
   request: { content: string; hasVisibility: boolean };
@@ -32,6 +33,7 @@ export const resolveOperationTypemap = async (
   const httpOp = getHttpOperation(program, op)[0];
   const ret: Awaited<ReturnType<typeof resolveOperationTypemap>> = {
     types: {
+      doc: getDoc(program, op),
       parameters: { content: "null", hasVisibility: false },
       request: { content: "null", hasVisibility: false },
       response: { content: [] },

@@ -14,10 +14,12 @@ import * as test_inner from './test.inner.ts';
 
 export type types_test = {
   ['/']: {
+    /** Retrieves an instance of the ressource */
     ['GET']: {
       request: null,
       response: {status: 200, body: test.Resource}
     },
+    /** Creates a resource */
     ['PUT']: {
       request: test.Resource | test_inner.InnerModel,
       response: {status: 200, body: {

@@ -15,10 +15,12 @@ import {Lifecycle, FilterLifecycle} from './lifecycleVisibility.ts';
 
 export type types_test<V extends Lifecycle = Lifecycle.All> = {
   ['/']: {
+    /** Retrieves an instance of the ressource */
     ['GET']: {
       request: null,
       response: {status: 200, body: test.Resource<V extends Lifecycle.All ? (Lifecycle.Read) : V>}
     },
+    /** Creates a resource */
     ['PUT']: {
       request: test.Resource<V extends Lifecycle.All ? (Lifecycle.Create | Lifecycle.Update) : V> | test_inner.InnerModel<V extends Lifecycle.All ? (Lifecycle.Create | Lifecycle.Update) : V>,
       response: {status: 200, body: {

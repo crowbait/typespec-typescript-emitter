@@ -114,7 +114,7 @@ export const emitRoutedTypemap = async (
             verbret.push(
               `      response: ${verb[1].response.content.map((res) => `{status: ${res.status}, body: ${res.body}}`).join(" | ")}`,
             );
-            return `    ['${verb[0]}']: {\n${verbret.join(",\n")}\n    }`;
+            return `${verb[1].doc ? `    /** ${verb[1].doc} */\n` : ""}    ['${verb[0]}']: {\n${verbret.join(",\n")}\n    }`;
           })
           .join(",\n");
         pathret += "\n  }";
