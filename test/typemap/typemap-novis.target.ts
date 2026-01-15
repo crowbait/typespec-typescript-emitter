@@ -15,11 +15,11 @@ import * as test_inner from './test.inner.ts';
 export type types_test = {
   ['/']: {
     ['GET']: {
-      request: null
+      request: null,
       response: {status: 200, body: test.Resource}
     },
     ['PUT']: {
-      request: test.Resource | test_inner.InnerModel
+      request: test.Resource | test_inner.InnerModel,
       response: {status: 200, body: {
         statusCode: 200
       }}
@@ -27,7 +27,7 @@ export type types_test = {
   },
   ['/inner']: {
     ['DELETE']: {
-      request: test_inner.InnerModel | test_inner.InnerModel2
+      request: test_inner.InnerModel | test_inner.InnerModel2,
       response: {status: 200, body: {
         statusCode: 200
       }} | {status: 401, body: {
