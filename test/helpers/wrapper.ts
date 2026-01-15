@@ -13,6 +13,7 @@ export const defaultConfig: Omit<EmitterOptions, "out-dir"> = {
   "enable-typeguards": false,
   "enable-routes": false,
   "enable-routed-typemap": false,
+  "enable-routed-path-params": false,
   "string-nominal-enums": true,
   "serializable-date-types": true,
   "type-mappings": {},

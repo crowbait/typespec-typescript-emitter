@@ -7,15 +7,20 @@ import {
 export interface EmitterOptions {
   "root-namespaces": string[];
   "out-dir": string;
+
   "enable-types": boolean;
   "enable-typeguards": boolean;
+
   "enable-routes": boolean;
+
   "enable-routed-typemap": boolean;
+  "enable-routed-path-params": boolean;
+
+  "import-file-extensions": boolean;
   "string-nominal-enums": boolean;
   "serializable-date-types": boolean;
   "type-mappings": Record<string, string>;
   "typeguard-mappings": Record<string, string>;
-  "import-file-extensions": boolean;
 }
 
 const EmitterOptionsSchema: JSONSchemaType<EmitterOptions> = {
@@ -23,10 +28,16 @@ const EmitterOptionsSchema: JSONSchemaType<EmitterOptions> = {
   properties: {
     "root-namespaces": { type: "array", items: { type: "string" } },
     "out-dir": { type: "string", format: "absolute-path" },
+
     "enable-types": { type: "boolean" },
     "enable-typeguards": { type: "boolean" },
+
     "enable-routes": { type: "boolean" },
+
     "enable-routed-typemap": { type: "boolean" },
+    "enable-routed-path-params": { type: "boolean" },
+
+    "import-file-extensions": { type: "boolean" },
     "string-nominal-enums": { type: "boolean" },
     "serializable-date-types": { type: "boolean" },
     "type-mappings": {
@@ -39,7 +50,6 @@ const EmitterOptionsSchema: JSONSchemaType<EmitterOptions> = {
       required: [],
       additionalProperties: { type: "string" },
     },
-    "import-file-extensions": { type: "boolean" },
   },
   required: ["root-namespaces"],
   additionalProperties: false,
@@ -53,18 +63,20 @@ export const optionDependencies = (
 } => ({
   ["root-namespaces"]: [[], []],
   ["out-dir"]: [context.emitterOutputDir, []],
+
   ["enable-types"]: [false, []],
-  ["enable-routes"]: [false, []],
-  ["string-nominal-enums"]: [false, []],
-  ["serializable-date-types"]: [false, []],
-
   ["enable-typeguards"]: [false, ["enable-types"]],
-  ["enable-routed-typemap"]: [false, ["enable-types"]],
 
-  ["type-mappings"]: [{}, []],
-  ["typeguard-mappings"]: [{}, []],
+  ["enable-routes"]: [false, []],
+
+  ["enable-routed-typemap"]: [false, ["enable-types"]],
+  ["enable-routed-path-params"]: [false, ["enable-routed-typemap"]],
 
   ["import-file-extensions"]: [false, []],
+  ["serializable-date-types"]: [false, []],
+  ["string-nominal-enums"]: [false, []],
+  ["type-mappings"]: [{}, []],
+  ["typeguard-mappings"]: [{}, []],
 });
 
 export const $lib = createTypeSpecLibrary({

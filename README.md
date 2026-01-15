@@ -52,6 +52,8 @@ options:
     enable-typeguards: false
     enable-routes: false
     enable-routed-typemap: false
+    enable-routed-path-params: false
+    import-file-extensions: false
     string-nominal-enums: false
     serializable-date-types: false
 ```
@@ -64,11 +66,12 @@ The following options are available:
 - `enable-typeguards` (default: false, **requires** `enable-types`): enables output of [typeguards](#typeguards).
 - `enable-routes` (default: false): enables output of the [HTTP-routes object](#emitter-routes).
 - `enable-routed-typemap` (default: false, **requires** `enable-types`): enables output of an [indexable type](#emitter-routed-typemap), mapping paths and HTTP verbs to request and response bodies.
+- `enable-routed-path-params` (default: false, **requires** `enable-routed-typemap`): includes a `pathParams` object in the routed typemap for each operation.
+- `import-file-extensions` (default: false): if true, import statements get the `.ts` extension, otherwise, the file extension is omitted for import statements.
 - `string-nominal-enums` (default: false): outputs member names as strings instead of index values for enum members declared without explicit values.
 - `serializable-date-types` (default: false): outputs serializable types for typespec's dates types that match OpenApi spec. Types like `offsetDateTime`, `plainDate` and `utcDateTime` will be emitted as `string` and `unixTimestamp32` as `number`. If disabled, all these types resolve to `Date`.
 - `type-mappings` (default: undefined): see [Overriding Types \& Typeguards](#overriding-types--typeguards)
 - `typeguard-mappings` (default: undefined): see [Overriding Types \& Typeguards](#overriding-types--typeguards)
-- `import-file-extensions` (default: false): if true, import statements get the `.ts` extension, otherwise, the file extension is omitted for import statements.
 
 ## Emitter: Types
 

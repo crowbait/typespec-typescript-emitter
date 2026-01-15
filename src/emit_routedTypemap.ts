@@ -108,9 +108,12 @@ export const emitRoutedTypemap = async (
         pathret += Object.entries(path[1])
           .map((verb) => {
             const verbret: string[] = [];
-            if (options['enable-routed-path-params']) verbret.push(`      pathParams: ${verb[1].parameters.content}`);
+            if (options["enable-routed-path-params"])
+              verbret.push(`      pathParams: ${verb[1].parameters.content}`);
             verbret.push(`      request: ${verb[1].request.content}`);
-            verbret.push(`      response: ${verb[1].response.content.map((res) => `{status: ${res.status}, body: ${res.body}}`).join(" | ")}`);
+            verbret.push(
+              `      response: ${verb[1].response.content.map((res) => `{status: ${res.status}, body: ${res.body}}`).join(" | ")}`,
+            );
             return `    ['${verb[0]}']: {\n${verbret.join(",\n")}\n    }`;
           })
           .join(",\n");
