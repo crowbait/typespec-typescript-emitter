@@ -1,3 +1,12 @@
+## [2.3.1](https://github.com/crowbait/typespec-typescript-emitter/compare/v2.3.0...v2.3.1) (2026-01-15)
+
+
+### Bug Fixes
+
+* per-operation jsdoc strings on methods in routed typemap ([20bd0b1](https://github.com/crowbait/typespec-typescript-emitter/commit/20bd0b186259e873aa67a06db1b915576c0ba2d0))
+
+
+
 # [2.3.0](https://github.com/crowbait/typespec-typescript-emitter/compare/v2.2.0...v2.3.0) (2026-01-15)
 
 
@@ -31,10 +40,6 @@
 
 
 ## [2.0.1](https://github.com/crowbait/typespec-typescript-emitter/compare/v1.3.0...v2.0.1) (2025-11-30)
-
-
-
-# [1.3.0](https://github.com/crowbait/typespec-typescript-emitter/compare/v2.0.0...v1.3.0) (2025-11-30)
 
 
 
