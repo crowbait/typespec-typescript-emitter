@@ -189,6 +189,8 @@ export const resolveOperationTypemap = async (
             );
           }
 
+          if (modelret.body === "{}") modelret.body = "undefined";
+
           responseRet.content.push(modelret);
 
           break;

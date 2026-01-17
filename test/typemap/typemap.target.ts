@@ -23,13 +23,13 @@ export type types_test<V extends Lifecycle = Lifecycle.All> = {
     /** Creates a resource */
     ['PUT']: {
       request: test.Resource<V extends Lifecycle.All ? (Lifecycle.Create | Lifecycle.Update) : V> | test_inner.InnerModel<V extends Lifecycle.All ? (Lifecycle.Create | Lifecycle.Update) : V>,
-      response: {status: 200, body: {}}
+      response: {status: 200, body: undefined}
     }
   },
   ['/inner']: {
     ['DELETE']: {
       request: test_inner.InnerModel<V extends Lifecycle.All ? (Lifecycle.Delete) : V> | test_inner.InnerModel2,
-      response: {status: 200, body: {}} | {status: 401, body: {}}
+      response: {status: 200, body: undefined} | {status: 401, body: undefined}
     }
   }
 };
