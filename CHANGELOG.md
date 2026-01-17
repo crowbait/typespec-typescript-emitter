@@ -1,3 +1,12 @@
+## [2.3.2](https://github.com/crowbait/typespec-typescript-emitter/compare/v2.3.1...v2.3.2) (2026-01-17)
+
+
+### Bug Fixes
+
+* cleanup ([6e120c5](https://github.com/crowbait/typespec-typescript-emitter/commit/6e120c5409d0517c31edf8ddd278bd1aa4c0eb8e))
+
+
+
 ## [2.3.1](https://github.com/crowbait/typespec-typescript-emitter/compare/v2.3.0...v2.3.1) (2026-01-15)
 
 
@@ -36,10 +45,6 @@
 ### Features
 
 * overridable types + typeguards, closes [#15](https://github.com/crowbait/typespec-typescript-emitter/issues/15) ([71a6fef](https://github.com/crowbait/typespec-typescript-emitter/commit/71a6fef82569a4d378e1ba3c4e9dd94a2e6ccc80))
-
-
-
-## [2.0.1](https://github.com/crowbait/typespec-typescript-emitter/compare/v1.3.0...v2.0.1) (2025-11-30)
 
 
 
