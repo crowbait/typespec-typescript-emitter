@@ -46,10 +46,6 @@ export const resolveOperationTypemap = async (
     (p) => p.type === "path",
   );
   if (options["enable-routed-path-params"] && pathParams.length) {
-    console.log(
-      httpOp.path,
-      pathParams.map((p) => [p.name, p.param, p.param.type, p.param.type.kind]),
-    );
     const paramsString = new AppendableString("{");
     if (pathParams.length > 1) paramsString.append("\n");
     let i = 1;
@@ -83,7 +79,6 @@ export const resolveOperationTypemap = async (
     }
     paramsString.addLine("}", pathParams.length > 1 ? 3 : 0, "continued");
     ret.types.parameters.content = paramsString.value;
-    console.log(ret.types.parameters);
   }
 
   // request
