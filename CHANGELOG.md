@@ -1,3 +1,13 @@
+## [2.3.3](https://github.com/crowbait/typespec-typescript-emitter/compare/v2.3.2...v2.3.3) (2026-01-17)
+
+
+### Bug Fixes
+
+* empty body types in routed typemap are not `undefined` instead of `{}` ([5162f05](https://github.com/crowbait/typespec-typescript-emitter/commit/5162f05d3b8966566c03d1f40703fa6d196abc05))
+* fix erroneous emit of ody: {statusCode: X} in routed typemap for status-only responses ([47e2ee9](https://github.com/crowbait/typespec-typescript-emitter/commit/47e2ee92909a68556794393e39827a1a7a1ebb1d))
+
+
+
 ## [2.3.2](https://github.com/crowbait/typespec-typescript-emitter/compare/v2.3.1...v2.3.2) (2026-01-17)
 
 
@@ -36,15 +46,6 @@
 ### Features
 
 * option to enabled/disable .ts file extensions on import statements ([c6a423e](https://github.com/crowbait/typespec-typescript-emitter/commit/c6a423e73139a35b36f8c413431f408a09dd9d89))
-
-
-
-# [2.1.0](https://github.com/crowbait/typespec-typescript-emitter/compare/v2.0.1...v2.1.0) (2025-12-18)
-
-
-### Features
-
-* overridable types + typeguards, closes [#15](https://github.com/crowbait/typespec-typescript-emitter/issues/15) ([71a6fef](https://github.com/crowbait/typespec-typescript-emitter/commit/71a6fef82569a4d378e1ba3c4e9dd94a2e6ccc80))
 
 
 
