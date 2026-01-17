@@ -137,8 +137,10 @@ export const resolveOperationTypemap = async (
               if (
                 decorator.definition?.name === "@statusCode" &&
                 prop[1].type.kind === "Number"
-              )
+              ) {
                 modelret.status = prop[1].type.value;
+                wasFullyQualified = true;
+              }
               // find body definiton
               if (decorator.definition?.name === "@body") {
                 const resolved = await Resolvable.resolve(
@@ -157,12 +159,12 @@ export const resolveOperationTypemap = async (
                 );
                 if (resolved.hasVisibility) modelret.hasVisibility = true;
                 ret.imports.push(...resolved.imports);
+                wasFullyQualified = true;
                 modelret.body = replaceLifecycle(
                   resolved.resolved.value,
                   "RETURN",
                   resolved.hasVisibility,
                 );
-                wasFullyQualified = true;
               }
             }
           }

@@ -22,19 +22,13 @@ export type types_test = {
     /** Creates a resource */
     ['PUT']: {
       request: test.Resource | test_inner.InnerModel,
-      response: {status: 200, body: {
-        statusCode: 200
-      }}
+      response: {status: 200, body: {}}
     }
   },
   ['/inner']: {
     ['DELETE']: {
       request: test_inner.InnerModel | test_inner.InnerModel2,
-      response: {status: 200, body: {
-        statusCode: 200
-      }} | {status: 401, body: {
-        statusCode: 401
-      }}
+      response: {status: 200, body: {}} | {status: 401, body: {}}
     }
   }
 };
