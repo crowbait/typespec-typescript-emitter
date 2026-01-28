@@ -478,6 +478,11 @@ For the smoothest contributing experience, please consider these guidelines:
 
 You may find the following section helpful.
 
+> [!IMPORTANT]
+> While the use of AI tools is permissable when contributing to this project, you **must** disclose when AI tools were used and which model was used.
+> You have a strong obligation to review all code an AI may have generated.
+> When composing a pull request, please edit AI-generated PR body texts to be concise.
+
 ### Short Overview
 
 This section roughly outlines the inner workings of the library.
