@@ -82,9 +82,15 @@ export const optionDependencies = (
 export const $lib = createTypeSpecLibrary({
   name: "typespec-typescript-emitter",
   diagnostics: {},
+  state: {
+    asyncOp: { description: "State for @asyncOp decorator" },
+  },
   emitter: {
     options: EmitterOptionsSchema,
   },
 });
 
 export const { reportDiagnostic, createDiagnostic } = $lib;
+
+// Export state keys for use in decorators
+export const AsyncOpStateKey = $lib.stateKeys.asyncOp;

@@ -9,4 +9,4 @@ dist/
 node_modules/
 
 test/out/*
-!test/out/.gitkeep
+!test/out/.gitkeep.claude/
