@@ -13,10 +13,12 @@ export const defaultConfig: Omit<EmitterOptions, "out-dir"> = {
   "enable-typeguards": false,
   "enable-routes": false,
   "enable-routed-typemap": false,
+  "enable-routed-path-params": false,
   "string-nominal-enums": true,
   "serializable-date-types": true,
   "type-mappings": {},
   "typeguard-mappings": {},
+  "import-file-extensions": true,
 };
 
 type Filename = string;
@@ -46,14 +48,18 @@ export const expectEmit = <T extends string | Record<Filename, string>>(
         console.error(
           `${outFilename!} not found in ${Object.keys(result[0].outputs)}`,
         );
-      expect(result[0].outputs[outFilename!].trim()).toBe(target.trim());
+      expect(result[0].outputs[outFilename!].replaceAll("\r", "").trim()).toBe(
+        target.replaceAll("\r", "").trim(),
+      );
     } else {
       for (const t of Object.entries(target)) {
         expect(
           (
-            await result[0].program.host.readFile(resolveVirtualPath(t[0]))
+            await result[0].program.host.readFile(
+              resolveVirtualPath(t[0]).replaceAll("\r", "").trim(),
+            )
           ).text.trim(),
-        ).toBe(t[1].trim());
+        ).toBe(t[1].replaceAll("\r", "").trim());
       }
     }
   });

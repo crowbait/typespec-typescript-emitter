@@ -1,5 +1,6 @@
-import { Operation, Program, Type } from "@typespec/compiler";
+import { getDoc, Operation, Program, Type } from "@typespec/compiler";
 import { getHttpOperation } from "@typespec/http";
+import { AppendableString } from "../helpers/appendableString.js";
 import { TTypeMap } from "../helpers/buildTypeMap.js";
 import { EmitterOptions } from "../lib.js";
 import { Resolvable } from "./Resolvable.js";
@@ -7,7 +8,9 @@ import { Resolver } from "./Resolvable_helpers.js";
 
 /** Maps a route path to its typemap definition and required imports */
 export type TOperationTypemap = {
-  // "string" in these does not refer to the type "string"; it's the typescript code *as* string.
+  doc: string | undefined;
+  // "string" in these does not simply refer to the type "string"; it's the typescript code *as* string.
+  parameters: { content: string | null; hasVisibility: boolean };
   request: { content: string; hasVisibility: boolean };
   response: {
     content: Array<{
@@ -30,11 +33,53 @@ export const resolveOperationTypemap = async (
   const httpOp = getHttpOperation(program, op)[0];
   const ret: Awaited<ReturnType<typeof resolveOperationTypemap>> = {
     types: {
+      doc: getDoc(program, op),
+      parameters: { content: "null", hasVisibility: false },
       request: { content: "null", hasVisibility: false },
       response: { content: [] },
     },
     imports: [],
   };
+
+  // path parameters
+  const pathParams = httpOp.parameters.parameters.filter(
+    (p) => p.type === "path",
+  );
+  if (options["enable-routed-path-params"] && pathParams.length) {
+    const paramsString = new AppendableString("{");
+    if (pathParams.length > 1) paramsString.append("\n");
+    let i = 1;
+    for (const param of pathParams) {
+      const resolved = await Resolvable.resolve(
+        Resolver.Type,
+        param.param.type,
+        {
+          program,
+          options,
+          emitDocs: false,
+          nestlevel: 4,
+          rootType: null,
+          typemap,
+          rootTypeReady: true,
+          ancestryPath: [],
+        },
+      );
+      if (resolved.hasVisibility) ret.types.parameters.hasVisibility = true;
+      ret.imports.push(...resolved.imports);
+      paramsString.addLine(
+        `${param.name}: ${replaceLifecycle(
+          resolved.resolved.value,
+          httpOp.verb.toUpperCase(),
+          resolved.hasVisibility,
+        )}${i === pathParams.length ? "" : ","}`,
+        pathParams.length > 1 ? 4 : 0,
+        pathParams.length > 1 ? "line-end" : "continued",
+      );
+      i++;
+    }
+    paramsString.addLine("}", pathParams.length > 1 ? 3 : 0, "continued");
+    ret.types.parameters.content = paramsString.value;
+  }
 
   // request
   if (httpOp.parameters.body) {
@@ -92,8 +137,10 @@ export const resolveOperationTypemap = async (
               if (
                 decorator.definition?.name === "@statusCode" &&
                 prop[1].type.kind === "Number"
-              )
+              ) {
                 modelret.status = prop[1].type.value;
+                wasFullyQualified = true;
+              }
               // find body definiton
               if (decorator.definition?.name === "@body") {
                 const resolved = await Resolvable.resolve(
@@ -112,12 +159,12 @@ export const resolveOperationTypemap = async (
                 );
                 if (resolved.hasVisibility) modelret.hasVisibility = true;
                 ret.imports.push(...resolved.imports);
+                wasFullyQualified = true;
                 modelret.body = replaceLifecycle(
                   resolved.resolved.value,
                   "RETURN",
                   resolved.hasVisibility,
                 );
-                wasFullyQualified = true;
               }
             }
           }
@@ -141,6 +188,8 @@ export const resolveOperationTypemap = async (
               resolved.hasVisibility,
             );
           }
+
+          if (modelret.body === "{}") modelret.body = "undefined";
 
           responseRet.content.push(modelret);
 

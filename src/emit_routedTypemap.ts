@@ -90,11 +90,14 @@ export const emitRoutedTypemap = async (
 
   // emitting
   for (const ns of Object.entries(namespaceOps)) {
-    const importStrings = getImports(unique2D(namespaceImports[ns[0]]));
+    const importStrings = getImports(
+      unique2D(namespaceImports[ns[0]]),
+      options["import-file-extensions"],
+    );
 
     if (ns[1].hasVisibility) {
       importStrings.push(
-        `import {Lifecycle, FilterLifecycle} from './${visibilityHelperFileName}';`,
+        `import {Lifecycle, FilterLifecycle} from './${visibilityHelperFileName(options["import-file-extensions"])}';`,
       );
     }
 
@@ -104,11 +107,14 @@ export const emitRoutedTypemap = async (
         let pathret = `  ['${path[0]}']: {\n`;
         pathret += Object.entries(path[1])
           .map((verb) => {
-            let verbret = `    ['${verb[0]}']: {\n`;
-            verbret += `      request: ${verb[1].request.content}\n`;
-            verbret += `      response: ${verb[1].response.content.map((res) => `{status: ${res.status}, body: ${res.body}}`).join(" | ")}\n`;
-            verbret += "    }";
-            return verbret;
+            const verbret: string[] = [];
+            if (options["enable-routed-path-params"])
+              verbret.push(`      pathParams: ${verb[1].parameters.content}`);
+            verbret.push(`      request: ${verb[1].request.content}`);
+            verbret.push(
+              `      response: ${verb[1].response.content.map((res) => `{status: ${res.status}, body: ${res.body}}`).join(" | ")}`,
+            );
+            return `${verb[1].doc ? `    /** ${verb[1].doc} */\n` : ""}    ['${verb[0]}']: {\n${verbret.join(",\n")}\n    }`;
           })
           .join(",\n");
         pathret += "\n  }";

@@ -1,47 +1,51 @@
-# [1.2.0](https://github.com/crowbait/typespec-typescript-emitter/compare/v1.1.2...v1.2.0) (2025-11-18)
-
-
-### Features
-
-* serializable-date-types ([ba4775d](https://github.com/crowbait/typespec-typescript-emitter/commit/ba4775d2292dcec4436470b19e9c1aea3b9b3e70))
-* string-nominal-enums ([a0b572c](https://github.com/crowbait/typespec-typescript-emitter/commit/a0b572c2f19baa5d100663458f2ea1ad182b4323))
-
-
-
-## [1.1.2](https://github.com/crowbait/typespec-typescript-emitter/compare/v1.1.1...v1.1.2) (2025-11-17)
-
-
-
-## [1.1.1](https://github.com/crowbait/typespec-typescript-emitter/compare/v1.1.0...v1.1.1) (2025-09-26)
+## [2.3.3](https://github.com/crowbait/typespec-typescript-emitter/compare/v2.3.2...v2.3.3) (2026-01-17)
 
 
 ### Bug Fixes
 
-* routed typemap respects visibility modifiers ([13c0a45](https://github.com/crowbait/typespec-typescript-emitter/commit/13c0a45f38b949a36ad2e8b6c40a1829ff3b54da))
-* routed-typemap handling of multiple verbs on same path ([f33e6d9](https://github.com/crowbait/typespec-typescript-emitter/commit/f33e6d94d78523206813ab4191feee29cb6c3b2e))
-* routes / routed typemap emitters now resolve ops inside interfaces ([21504bc](https://github.com/crowbait/typespec-typescript-emitter/commit/21504bc74cc4f77aeac1f1bcb4e52a42917d9146))
-* thorough resolution of nested types in typemap ([95af299](https://github.com/crowbait/typespec-typescript-emitter/commit/95af299b662dbcba0d21b56aa8ebe2f91c6e6e92))
+* empty body types in routed typemap are not `undefined` instead of `{}` ([5162f05](https://github.com/crowbait/typespec-typescript-emitter/commit/5162f05d3b8966566c03d1f40703fa6d196abc05))
+* fix erroneous emit of ody: {statusCode: X} in routed typemap for status-only responses ([47e2ee9](https://github.com/crowbait/typespec-typescript-emitter/commit/47e2ee92909a68556794393e39827a1a7a1ebb1d))
 
 
 
-# [1.1.0](https://github.com/crowbait/typespec-typescript-emitter/compare/v1.0.0...v1.1.0) (2025-05-23)
+## [2.3.2](https://github.com/crowbait/typespec-typescript-emitter/compare/v2.3.1...v2.3.2) (2026-01-17)
+
+
+### Bug Fixes
+
+* cleanup ([6e120c5](https://github.com/crowbait/typespec-typescript-emitter/commit/6e120c5409d0517c31edf8ddd278bd1aa4c0eb8e))
 
 
 
-# [1.0.0](https://github.com/crowbait/typespec-typescript-emitter/compare/v0.4.1...v1.0.0) (2025-03-13)
+## [2.3.1](https://github.com/crowbait/typespec-typescript-emitter/compare/v2.3.0...v2.3.1) (2026-01-15)
 
 
-* feat!: complete rework of routes emitter ([2f07e7f](https://github.com/crowbait/typespec-typescript-emitter/commit/2f07e7f487f0e6531b89e66f7de4d7d09382e4e5))
+### Bug Fixes
+
+* per-operation jsdoc strings on methods in routed typemap ([20bd0b1](https://github.com/crowbait/typespec-typescript-emitter/commit/20bd0b186259e873aa67a06db1b915576c0ba2d0))
+
+
+
+# [2.3.0](https://github.com/crowbait/typespec-typescript-emitter/compare/v2.2.0...v2.3.0) (2026-01-15)
+
+
+### Bug Fixes
+
+* proper comma-separation of props in routed typemap ([0e27831](https://github.com/crowbait/typespec-typescript-emitter/commit/0e278310dbb705b59b40fa933449e058d83950fb))
 
 
 ### Features
 
-* routed typemap ([0a57f43](https://github.com/crowbait/typespec-typescript-emitter/commit/0a57f439e6f483c35b00824c725aecc66d3a80df))
+* option to emit path params types in routed typemap ([38b4ddf](https://github.com/crowbait/typespec-typescript-emitter/commit/38b4ddf8a2ff9d1a356b4bf76c9c7d3abe4fac1b))
 
 
-### BREAKING CHANGES
 
-* This breaks existing configurations and - depending on how it was used - usage of the emitted routes object.
+# [2.2.0](https://github.com/crowbait/typespec-typescript-emitter/compare/v2.1.0...v2.2.0) (2026-01-14)
+
+
+### Features
+
+* option to enabled/disable .ts file extensions on import statements ([c6a423e](https://github.com/crowbait/typespec-typescript-emitter/commit/c6a423e73139a35b36f8c413431f408a09dd9d89))
 
 
 

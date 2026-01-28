@@ -14,25 +14,21 @@ import * as test_inner from './test.inner.ts';
 
 export type types_test = {
   ['/']: {
+    /** Retrieves an instance of the ressource */
     ['GET']: {
-      request: null
+      request: null,
       response: {status: 200, body: test.Resource}
     },
+    /** Creates a resource */
     ['PUT']: {
-      request: test.Resource | test_inner.InnerModel
-      response: {status: 200, body: {
-        statusCode: 200
-      }}
+      request: test.Resource | test_inner.InnerModel,
+      response: {status: 200, body: undefined}
     }
   },
   ['/inner']: {
     ['DELETE']: {
-      request: test_inner.InnerModel | test_inner.InnerModel2
-      response: {status: 200, body: {
-        statusCode: 200
-      }} | {status: 401, body: {
-        statusCode: 401
-      }}
+      request: test_inner.InnerModel | test_inner.InnerModel2,
+      response: {status: 200, body: undefined} | {status: 401, body: undefined}
     }
   }
 };

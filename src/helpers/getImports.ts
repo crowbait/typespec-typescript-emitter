@@ -3,7 +3,9 @@ import { filenameFromNamespaces } from "./namespaces.js";
 
 export const getImports = (
   imports: TTypeMap[number]["namespaces"][],
+  includeExtension: boolean,
 ): string[] =>
   imports.map(
-    (i) => `import * as ${i.join("_")} from './${filenameFromNamespaces(i)}';`,
+    (i) =>
+      `import * as ${i.join("_")} from './${filenameFromNamespaces(i, includeExtension)}';`,
   );
