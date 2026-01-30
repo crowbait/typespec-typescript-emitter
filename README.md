@@ -26,7 +26,6 @@ It can the following things:
 - [Emitter: Routes](#emitter-routes)
 - [Emitter: Routed Typemap](#emitter-routed-typemap)
 - [Contributing](#contributing)
-  - [Short Overview](#short-overview)
   - [Todo](#todo)
 
 ## Installation
@@ -471,40 +470,7 @@ type T_update2 = types_namespaceA[typeof routes_namespaceA.typemap.add.path]['PO
 
 Thank you very much for considering investing time into this project!
 
-For the smoothest contributing experience, please consider these guidelines:
-
-- please use [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/#summary)
-- if your contribution expands functionality, please consider drafting tests for it
-
-You may find the following section helpful.
-
-> [!IMPORTANT]
-> While the use of AI tools is permissable when contributing to this project, you **must** disclose when AI tools were used and which model was used.
-> You have a strong obligation to review all code an AI may have generated.
-> When composing a pull request, please edit AI-generated PR body texts to be concise.
-
-### Short Overview
-
-This section roughly outlines the inner workings of the library.
-
-- `lib.ts` defines primarily emitter options
-- `emitter.ts` is the main entry point
-
-`$onEmit` calls the actual emitters defined in `emit_*` files.
-These each traverse the program, recursively collecting the objects they are interested in (emittable types, operations, ...) from the root namespaces specified by the user.
-
-The primary resolution of types and typeguards starts in `resolve/Resolvable.ts`.
-It defines an abstract class which both contains static functions to resolve types as well as inherited methods each type resolver implements and uses to recursively resolve.
-Each resolvable type defines its methods in an inherited class, in `resolve/types/[type].ts`.
-
-The primary flow of type resolution is quite simple:
-
-- `static Resolvable.resolve` calls `static Resolvable.for`, which returns a `Resolvable` instance for the specific type (we will call this instance `rt`, for "resolvable type")
-- `rt.resolve` first checks a list of all types found in the program - even if they have not been yet resolved, they will be and then will be emitted - so they should just be referenced. This returns the name and skips all further resolution, ending the process here.
-- `rt.type` or `rt.typeguard` are invoked: these are defined for each type in its class. Depending on the type, these either resolve directly, ending the process here, or have other types "within" them (unions or models, for example, have this). In this case, `rt.resolveNested` is called, which finishes the recursive loop by calling `static Resolvable.resolve` on the "child" type.
-
-Most of these methods do not return data, because they mutate an "output" object passed as a parameter. This has proven to be much more concise than passing return values up and down the chain.
-Also to be considered is the `hasVisibility` flag showing up at many points. This is used to ultimately determine whether a type needs lifecycle visibility handling in any way (because if any part of it does, so does the whole thing).
+Please refer to the [contribution guide](./CONTRIBUTING.md) for guidelines and a short summary of the inner machinations of the library.
 
 ### Todo
 
