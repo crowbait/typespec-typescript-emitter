@@ -46,12 +46,12 @@ You **CAN NOT** use AI tools for:
 - generating your issue / PR text
 - generating the majority of your code
 
+This helps identify potential issues or improvements and ensures you fully understand the problem or solution: for issues, you must be able to answer follow-up questions; for PRs, you must have a complete understanding of *every single line of code* you submit.
+This ultimately boils down to the responsibilities of FOSS contributors.
+
 > [!WARNING]
 > Any PR or issue tagged as being co-authored by AI tools **can not** be accepted.
 > This is due to both due-diligence concerns regarding the code base and the still not entirely clear moral and legal implications of LLM-generated code ownership.
-
-This helps identify potential issues or improvements and ensures you fully understand the problem or solution: for issues, you must be able to answer follow-up questions; for PRs, you must have a complete understanding of *every single line of code* you submit.
-This ultimately boils down to the responsibilities of FOSS contributors.
 
 **Note**: these restrictions are neither meant to bash on LLM users (I use them myself for various things), oppose AI in general, or annoy you specifically because you would like to use an AI for your contribution. They are meant to ensure efficiency (because AI issues and PRs tend to be around 3 times longer than if a human had written them, without providing any additional relevant information) and help protect the long-term health of the code base.
 
