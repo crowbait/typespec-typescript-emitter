@@ -2,7 +2,9 @@
 
 - [ ] I have read the [contribution guidelines](../CONTRIBUTING.md)
 - [ ] I have read the [guidelines on use of AI](../CONTRIBUTING.md#use-of-ai-and-automated-tools)
-- [ ] I have used AI tools to write this issue
+- [ ] I have used AI tools to write this PR
+  - If yes, specify tools/models and how they were used:
+- [ ] I have used AI tools when writing the code of this PR
   - If yes, specify tools/models and how they were used:
 
 ## Motivation
