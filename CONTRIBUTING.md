@@ -47,7 +47,12 @@ You **CAN NOT** use AI tools for:
 - generating the majority of your code
 
 This helps identify potential issues or improvements and ensures you fully understand the problem or solution: for issues, you must be able to answer follow-up questions; for PRs, you must have a complete understanding of *every single line of code* you submit.
-This ultimately boils down to the responsibilities of FOSS contributors.
+This ultimately boils down to our responsibilities as FOSS contributors.
+
+> [!IMPORTANT]
+> As contributors, we always make it painfully clear that there are no warranties.
+> Still, users trust our work to be at least the best we can do. Although not providing legal warranties, we have a moral obligation to make the code we have our users run be the best we can do - both in stability and safety.
+> You *can never* fulfill this implicit promise to both users and the rest of the FOSS community if you do not understand the code you ship.
 
 > [!WARNING]
 > Any PR or issue tagged as being co-authored by AI tools **can not** be accepted.
